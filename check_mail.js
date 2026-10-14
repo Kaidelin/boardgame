@@ -1,15 +1,30 @@
 const https = require('https');
+const nodemailer = require('nodemailer');
 
 const GIST_ID = process.env.GIST_ID;
 const GH_TOKEN = process.env.GH_TOKEN;
-const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID;
-const EMAILJS_TEMPLATE_ID = process.env.EMAILJS_TEMPLATE_ID;
-const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY;
+
+// 회사 사내 SMTP 설정 (GitHub Secrets에서 가져옴)
+const SMTP_HOST = process.env.SMTP_HOST;       // 예: smtp.company.com
+const SMTP_PORT = process.env.SMTP_PORT || 465; // 보통 SSL은 465, TLS는 587
+const SMTP_USER = process.env.SMTP_USER;       // 발송용 사내 계정 이메일
+const SMTP_PASS = process.env.SMTP_PASS;       // 발송용 계정 비밀번호
 
 if (!GIST_ID || !GH_TOKEN) {
   console.log("GIST 설정이 없습니다.");
   process.exit(0);
 }
+
+// 사내 SMTP 전송 설정
+const transporter = nodemailer.createTransport({
+  host: SMTP_HOST,
+  port: Number(SMTP_PORT),
+  secure: Number(SMTP_PORT) === 465, // 465포트면 true, 587이면 false
+  auth: {
+    user: SMTP_USER,
+    pass: SMTP_PASS
+  }
+});
 
 // 깃허브 Gist에서 최신 달력 데이터 불러오기
 https.get(`https://api.github.com/gists/${GIST_ID}`, {
@@ -39,8 +54,8 @@ https.get(`https://api.github.com/gists/${GIST_ID}`, {
       const dow = dowNames[now.getDay()];
 
       // 점심 / 저녁 각각 4인 이상 성사되었고 아직 당일 안내를 안 보낸 경우 발송
-      await processSlot(todayKey, 'lunch', '☀️ 점심시간', dayData.lunch, dayData, y, m, d, dow);
-      await processSlot(todayKey, 'dinner', '🌙 저녁시간', dayData.dinner, dayData, y, m, d, dow);
+      await processSlot(todayKey, 'lunch', '☀️ 점심시간', dayData.lunch, dayData, y, m, d, dow, db);
+      await processSlot(todayKey, 'dinner', '🌙 저녁시간', dayData.dinner, dayData, y, m, d, dow, db);
 
       // 수정된 데이터(발송 완료 기록) 다시 Gist에 저장
       await updateGist(db);
@@ -51,7 +66,7 @@ https.get(`https://api.github.com/gists/${GIST_ID}`, {
   });
 }).on('error', e => console.error(e));
 
-async function processSlot(dateKey, type, label, attendees, dayData, y, m, d, dow) {
+async function processSlot(dateKey, type, label, attendees, dayData, y, m, d, dow, db) {
   if (!attendees || attendees.length < 4) return;
   
   const notifyField = `daily_notified_${type}`;
@@ -63,55 +78,31 @@ async function processSlot(dateKey, type, label, attendees, dayData, y, m, d, do
   const emails = attendees.map(name => db.emails && db.emails[name]).filter(Boolean);
   if (emails.length === 0) {
     console.log(`${dateKey} ${type} 참석자 중 등록된 이메일이 없습니다.`);
-    dayData[notifyField] = true; // 대상이 없어도 처리 완료로 마킹
+    dayData[notifyField] = true;
     return;
   }
 
   const fullDateLabel = `${y}년 ${m}월 ${d}일(${dow}) ${label}`;
-  const success = await sendEmailJS({
-    to_email: emails.join(', '),
-    date_label: fullDateLabel,
-    member_count: String(attendees.length),
-    members_list: attendees.join(', '),
-    calendar_url: `https://${process.env.GH_USER}.github.io/${process.env.GH_REPO}/`
-  });
+  const calendarUrl = `https://${process.env.GH_USER}.github.io/${process.env.GH_REPO}/`;
 
-  if (success) {
+  const mailOptions = {
+    from: `"보드게임 동아리" <${SMTP_USER}>`,
+    to: emails.join(', '),
+    subject: `[🎲 보드게임 성사] ${fullDateLabel} 모임이 확정되었습니다! (${attendees.length}명)`,
+    text: `안녕하세요! 오늘 예정된 보드게임 모임이 4인 이상 모여 성사되었습니다.\n\n` +
+          `■ 일시: ${fullDateLabel}\n` +
+          `■ 참석 인원 (${attendees.length}명): ${attendees.join(', ')}\n\n` +
+          `일정에 변동이 생기면 아래 동아리 달력에서 수정해 주세요.\n` +
+          `👉 달력 바로가기: ${calendarUrl}`
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
     dayData[notifyField] = true;
-    console.log(`✅ [${dateKey} ${type}] 당일 안내 메일 발송 성공 (${attendees.length}명)`);
+    console.log(`✅ [${dateKey} ${type}] 사내 메일 발송 성공 (${emails.length명}명에게 전송)`);
+  } catch (err) {
+    console.error(`❌ [${dateKey} ${type}] 메일 발송 실패:`, err);
   }
-}
-
-function sendEmailJS(params) {
-  return new Promise((resolve) => {
-    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
-      console.log("EmailJS 설정이 누락되어 메일을 발송할 수 없습니다.");
-      return resolve(false);
-    }
-
-    const postData = JSON.stringify({
-      service_id: EMAILJS_SERVICE_ID,
-      template_id: EMAILJS_TEMPLATE_ID,
-      user_id: EMAILJS_PUBLIC_KEY,
-      template_params: params
-    });
-
-    const req = https.request({
-      hostname: 'api.emailjs.com',
-      path: '/api/v1.0/email/send',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData)
-      }
-    }, (res) => {
-      resolve(res.statusCode === 200);
-    });
-
-    req.on('error', () => resolve(false));
-    req.write(postData);
-    req.end();
-  });
 }
 
 function updateGist(db) {
