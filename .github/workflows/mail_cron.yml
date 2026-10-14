@@ -1,0 +1,30 @@
+name: Send Daily Boardgame Reminder
+
+on:
+  schedule:
+    # UTC 기준 매일 00:00 = 한국 시간(KST) 매일 아침 9시 정각 자동 실행
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 수동 테스트 실행 버튼 제공
+
+jobs:
+  send-mail:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run mail sender script
+        env:
+          GIST_ID: ${{ secrets.GIST_ID }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
+          EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
+          EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
+          GH_USER: 'Kaidelin' # 👈 본인 아이디로 수정하세요
+          GH_REPO: 'boardgame'        # 👈 저장소 이름으로 수정하세요
+        run: node check_mail.js
