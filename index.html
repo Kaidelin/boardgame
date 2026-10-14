@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎲 사내 보드게임 동아리 월간 캘린더</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --sub: #64748b;
+      --my-border: #2563eb;
+      --my-bg: #eff6ff;
+      --ready-bg: #dcfce7;
+      --ready-border: #16a34a;
+      --ready-text: #15803d;
+    }
+    * { box-sizing: border-box; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { margin: 0; padding: 16px; background: var(--bg); color: var(--text); }
+    .container { max-width: 1280px; margin: 0 auto; }
+
+    /* 상단 헤더 및 컨트롤 바 */
+    .header {
+      background: var(--card); padding: 16px 20px; border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 14px;
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .title-area { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .title-area h1 { margin: 0; font-size: 1.25rem; }
+    .badge-stat {
+      font-size: 0.85rem; padding: 5px 10px; border-radius: 20px; font-weight: 600;
+      background: #f1f5f9; color: #334155;
+    }
+    .badge-stat.green { background: var(--ready-bg); color: var(--ready-text); }
+    .badge-stat.blue { background: var(--my-bg); color: var(--my-border); }
+
+    /* 사용자 선택 및 월 이동 바 */
+    .toolbar {
+      background: var(--card); padding: 12px 20px; border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 14px;
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .user-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .user-box select, .user-box input, .btn {
+      padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background: #fff;
+    }
+    .btn { cursor: pointer; font-weight: 600; transition: 0.15s; }
+    .btn:hover { background: #f1f5f9; }
+    .btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .month-nav { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; font-weight: 700; }
+
+    /* 범례 */
+    .legend {
+      display: flex; gap: 14px; font-size: 0.82rem; color: var(--sub); align-items: center; flex-wrap: wrap;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* 달력 그리드 */
+    .calendar-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+    }
+    .calendar-grid.weekdays-only {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .day-header {
+      text-align: center; font-weight: 700; font-size: 0.85rem; padding: 8px 0;
+      background: #e2e8f0; border-radius: 8px; color: #334155;
+    }
+    .day-header.sun { color: #dc2626; }
+    .day-header.sat { color: #2563eb; }
+
+    .day-cell {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px; min-height: 155px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .day-cell.empty { background: transparent; border: none; min-height: auto; }
+    .day-cell.today { border: 2px solid #0f172a; }
+    .date-num {
+      font-weight: 700; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 2px;
+    }
+    .today-tag {
+      background: #0f172a; color: #fff; font-size: 0.7rem; padding: 1px 6px; border-radius: 4px;
+    }
+
+    /* 점심 / 저녁 슬롯 버튼 */
+    .slot {
+      border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 8px;
+      cursor: pointer; transition: all 0.12s ease; background: #f8fafc;
+      display: flex; flex-direction: column; gap: 5px; flex: 1;
+      user-select: none;
+    }
+    .slot:hover { border-color: #94a3b8; transform: translateY(-1px); }
+
+    /* 4인 이상 성사 스타일 */
+    .slot.confirmed {
+      background: var(--ready-bg); border-color: var(--ready-border);
+    }
+    /* 나의 참석 스타일 (최우선 테두리 강조) */
+    .slot.my-joined {
+      border: 2.5px solid var(--my-border);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+    .slot.my-joined:not(.confirmed) {
+      background: var(--my-bg);
+    }
+
+    .slot-top {
+      display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 700;
+    }
+    .slot-badges { display: flex; gap: 4px; align-items: center; }
+    .count-badge {
+      font-size: 0.72rem; padding: 1px 6px; border-radius: 10px; background: #e2e8f0; color: #334155;
+    }
+    .slot.confirmed .count-badge {
+      background: #16a34a; color: #fff;
+    }
+    .my-badge {
+      font-size: 0.68rem; padding: 1px 5px; border-radius: 4px; background: #2563eb; color: #fff;
+    }
+
+    .names-list {
+      display: flex; flex-wrap: wrap; gap: 3px; font-size: 0.74rem; color: #475569; min-height: 18px;
+    }
+    .name-chip {
+      background: rgba(255,255,255,0.85); border: 1px solid #cbd5e1;
+      padding: 1px 5px; border-radius: 4px;
+    }
+    .name-chip.me {
+      background: #2563eb; color: #fff; border-color: #2563eb; font-weight: 700;
+    }
+
+    /* 초기 설정 모달 */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.6);
+      display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal {
+      background: #fff; max-width: 520px; width: 100%; border-radius: 14px; padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    .modal h2 { margin-top: 0; font-size: 1.15rem; }
+    .modal p { font-size: 0.88rem; color: #475569; line-height: 1.5; }
+    .modal input { width: 100%; padding: 9px 12px; margin: 6px 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
+    .share-box {
+      background: #f1f5f9; padding: 10px; border-radius: 8px; font-size: 0.8rem;
+      word-break: break-all; margin-top: 10px; border: 1px dashed #94a3b8;
+    }
+    .status-toast {
+      position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff;
+      padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; display: none; z-index: 200;
+    }
+
+    @media (max-width: 900px) {
+      .calendar-grid, .calendar-grid.weekdays-only { grid-template-columns: repeat(2, 1fr); }
+      .day-header { display: none; }
+      .day-cell.empty { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 상단 요약 바 -->
+  <div class="header">
+    <div class="title-area">
+      <h1>🎲 보드게임 동아리 캘린더</h1>
+      <span class="badge-stat green" id="statConfirmed">이번 달 4인 성사: 0타임</span>
+      <span class="badge-stat blue" id="statMyCount">나의 참석 예정: 0타임</span>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:#dcfce7;border:1.5px solid #16a34a;"></i> 4인 이상 성사!</span>
+      <span><i class="dot" style="background:#eff6ff;border:2px solid #2563eb;"></i> 내가 참석 체크한 날</span>
+      <label style="cursor:pointer;font-weight:600;color:#334155;">
+        <input type="checkbox" id="hideWeekends" onchange="renderCalendar()"> 평일(월~금)만 보기
+      </label>
+      <button class="btn" onclick="syncFromServer()">🔄 새로고침</button>
+      <button class="btn" onclick="openSetupModal()">⚙️ 동아리 연동 설정</button>
+    </div>
+  </div>
+
+  <!-- 내 이름 선택 및 월 이동 툴바 -->
+  <div class="toolbar">
+    <div class="user-box">
+      <strong>👤 내 이름:</strong>
+      <select id="userSelect" onchange="changeUser(this.value)">
+        <option value="">-- 본인 이름 선택 --</option>
+      </select>
+      <button class="btn" onclick="addNewMember()">+ 내 이름 등록</button>
+      <span style="font-size:0.82rem;color:#64748b;">(이름 선택 후 달력의 점심/저녁 칸을 클릭하세요)</span>
+    </div>
+
+    <div class="month-nav">
+      <button class="btn" onclick="moveMonth(-1)">◀ 이전 달</button>
+      <span id="monthLabel">2026년 10월</span>
+      <button class="btn" onclick="moveMonth(1)">다음 달 ▶</button>
+      <button class="btn" onclick="goToday()" style="font-size:0.8rem;">오늘</button>
+    </div>
+  </div>
+
+  <!-- 월간 달력 영역 -->
+  <div id="calendarGrid" class="calendar-grid"></div>
+</div>
+
+<!-- 초기 설정 & 플로우 링크 생성 모달 -->
+<div class="modal-backdrop" id="setupModal">
+  <div class="modal">
+    <h2>⚙️ GitHub 실시간 저장소 연동 (총무 전용 1회 설정)</h2>
+    <p>
+      1. GitHub 우측 상단 프로필 &gt; <b>Settings &gt; Developer settings &gt; Personal access tokens &gt; Tokens (classic)</b>에서 <b><code>gist</code></b> 권한만 체크해 토큰을 발급받으세요.<br>
+      2. 아래에 토큰을 붙여넣고 <b>[새 동아리 DB 자동 생성]</b>을 누르면 플로우(Flow) 공지용 링크가 바로 만들어집니다.
+    </p>
+    <label style="font-size:0.85rem;font-weight:700;">GitHub Token (ghp_...)</label>
+    <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+
+    <label style="font-size:0.85rem;font-weight:700;">Gist ID (자동 생성 시 비워두세요)</label>
+    <input type="text" id="gistInput" placeholder="새로 만들려면 비워두고 아래 파란 버튼을 누르세요">
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+      <button class="btn btn-primary" onclick="createNewGistDB()">✨ 새 동아리 DB 자동 생성</button>
+      <button class="btn" onclick="saveManualConfig()">기존 ID로 저장</button>
+      <button class="btn" onclick="closeSetupModal()" style="margin-left:auto;">닫기</button>
+    </div>
+
+    <div id="shareUrlBox" style="display:none;margin-top:16px;">
+      <strong style="font-size:0.85rem;color:#15803d;">✅ 연동 완료! 아래 링크를 플로우(Flow) 공지에 등록하세요:</strong>
+      <div class="share-box" id="shareUrlText"></div>
+      <button class="btn btn-primary" style="margin-top:8px;width:100%;" onclick="copyShareUrl()">📋 플로우 공지용 링크 복사하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="status-toast" id="toast">저장 중...</div>
+
+<script>
+  const GOAL_COUNT = 4; // 4인 이상 성사 기준
+  let currentYear = new Date().getFullYear();
+  let currentMonth = new Date().getMonth();
+  let currentUser = localStorage.getItem('bg_user') || '';
+  let gistId = localStorage.getItem('bg_gist_id') || '';
+  let ghToken = localStorage.getItem('bg_gh_token') || '';
+
+  // 데이터 구조: { members: ['홍길동', ...], schedule: { '2026-10-15': { lunch: ['홍길동'], dinner: [] } } }
+  let dbData = {
+    members: ['김보드', '이게임', '박전략', '최파티'],
+    schedule: {}
+  };
+
+  // URL 해시(#gist=...&key=...)로 접속 시 자동 세팅 (동아리원 원클릭 접속용)
+  function checkUrlHashConfig() {
+    if (location.hash && location.hash.includes('gist=')) {
+      const params = new URLSearchParams(location.hash.substring(1));
+      const g = params.get('gist');
+      const k = params.get('key');
+      if (g && k) {
+        gistId = g;
+        ghToken = atob(k);
+        localStorage.setItem('bg_gist_id', gistId);
+        localStorage.setItem('bg_gh_token', ghToken);
+        history.replaceState(null, null, location.pathname);
+        showToast('동아리 달력 연동이 자동으로 완료되었습니다!');
+      }
+    }
+  }
+
+  async function init() {
+    checkUrlHashConfig();
+    if (gistId && ghToken) {
+      await syncFromServer();
+    } else {
+      const savedLocal = localStorage.getItem('bg_demo_data');
+      if (savedLocal) dbData = JSON.parse(savedLocal);
+    }
+    renderUserSelect();
+    renderCalendar();
+  }
+
+  function showToast(msg, ms = 1800) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => { t.style.display = 'none'; }, ms);
+  }
+
+  function renderUserSelect() {
+    const sel = document.getElementById('userSelect');
+    sel.innerHTML = '<option value="">-- 본인 이름 선택 --</option>';
+    dbData.members.sort().forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      if (name === currentUser) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  function changeUser(val) {
+    currentUser = val;
+    localStorage.setItem('bg_user', val);
+    renderCalendar();
+  }
+
+  async function addNewMember() {
+    const name = prompt('동아리원 이름(또는 닉네임)을 입력하세요:');
+    if (!name || !name.trim()) return;
+    const clean = name.trim();
+    if (!dbData.members.includes(clean)) {
+      dbData.members.push(clean);
+    }
+    currentUser = clean;
+    localStorage.setItem('bg_user', clean);
+    renderUserSelect();
+    renderCalendar();
+    await saveToServer();
+  }
+
+  function moveMonth(delta) {
+    currentMonth += delta;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendar();
+  }
+
+  function goToday() {
+    const now = new Date();
+    currentYear = now.getFullYear();
+    currentMonth = now.getMonth();
+    renderCalendar();
+  }
+
+  function renderCalendar() {
+    document.getElementById('monthLabel').textContent = `${currentYear}년 ${currentMonth + 1}월`;
+    const grid = document.getElementById('calendarGrid');
+    const weekdaysOnly = document.getElementById('hideWeekends').checked;
+    grid.className = weekdaysOnly ? 'calendar-grid weekdays-only' : 'calendar-grid';
+    grid.innerHTML = '';
+
+    const headers = weekdaysOnly
+      ? [{t:'월',c:''},{t:'화',c:''},{t:'수',c:''},{t:'목',c:''},{t:'금',c:''}]
+      : [{t:'일',c:'sun'},{t:'월',c:''},{t:'화',c:''},{t:'수',c:''},{t:'목',c:''},{t:'금',c:''},{t:'토',c:'sat'}];
+
+    headers.forEach(h => {
+      const div = document.createElement('div');
+      div.className = `day-header ${h.c}`;
+      div.textContent = h.t;
+      grid.appendChild(div);
+    });
+
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const todayStr = formatDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
+
+    // 앞쪽 빈 칸 채우기
+    if (!weekdaysOnly) {
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'day-cell empty';
+        grid.appendChild(empty);
+      }
+    } else {
+      // 평일만 보기일 때 1일이 화~금이면 앞 빈칸 추가
+      if (firstDay >= 2 && firstDay <= 5) {
+        for (let i = 1; i < firstDay; i++) {
+          const empty = document.createElement('div');
+          empty.className = 'day-cell empty';
+          grid.appendChild(empty);
+        }
+      }
+    }
+
+    let confirmedTotal = 0;
+    let myTotal = 0;
+    const dayNames = ['일','월','화','수','목','금','토'];
+
+    for (let d = 1; d <= lastDate; d++) {
+      const dow = new Date(currentYear, currentMonth, d).getDay();
+      if (weekdaysOnly && (dow === 0 || dow === 6)) continue;
+
+      const dateKey = formatDate(currentYear, currentMonth + 1, d);
+      const dayData = dbData.schedule[dateKey] || { lunch: [], dinner: [] };
+      const lunchList = dayData.lunch || [];
+      const dinnerList = dayData.dinner || [];
+
+      if (lunchList.length >= GOAL_COUNT) confirmedTotal++;
+      if (dinnerList.length >= GOAL_COUNT) confirmedTotal++;
+      if (currentUser && lunchList.includes(currentUser)) myTotal++;
+      if (currentUser && dinnerList.includes(currentUser)) myTotal++;
+
+      const cell = document.createElement('div');
+      cell.className = 'day-cell' + (dateKey === todayStr ? ' today' : '');
+
+      const colorStyle = dow === 0 ? 'color:#dc2626;' : (dow === 6 ? 'color:#2563eb;' : '');
+      cell.innerHTML = `
+        <div class="date-num" style="${colorStyle}">
+          <span>${d}일 (${dayNames[dow]})</span>
+          ${dateKey === todayStr ? '<span class="today-tag">오늘</span>' : ''}
+        </div>
+      `;
+
+      cell.appendChild(createSlotEl(dateKey, 'lunch', '☀️ 점심', lunchList));
+      cell.appendChild(createSlotEl(dateKey, 'dinner', '🌙 저녁', dinnerList));
+      grid.appendChild(cell);
+    }
+
+    document.getElementById('statConfirmed').textContent = `이번 달 4인 성사: ${confirmedTotal}타임`;
+    document.getElementById('statMyCount').textContent = currentUser
+      ? `나의 참석(${currentUser}): ${myTotal}타임`
+      : '상단에서 내 이름을 선택하세요';
+  }
+
+  function createSlotEl(dateKey, type, label, list) {
+    const isConfirmed = list.length >= GOAL_COUNT;
+    const isMyJoined = currentUser && list.includes(currentUser);
+
+    const slot = document.createElement('div');
+    slot.className = 'slot' + (isConfirmed ? ' confirmed' : '') + (isMyJoined ? ' my-joined' : '');
+    slot.onclick = () => toggleAttendance(dateKey, type);
+
+    const badgeText = isConfirmed ? `🎲 ${list.length}명 성사!` : `${list.length}명`;
+    const chipsHtml = list.length === 0
+      ? '<span style="color:#94a3b8;font-size:0.72rem;">참석 클릭</span>'
+      : list.map(n => `<span class="name-chip ${n === currentUser ? 'me' : ''}">${n}</span>`).join('');
+
+    slot.innerHTML = `
+      <div class="slot-top">
+        <span>${label}</span>
+        <div class="slot-badges">
+          ${isMyJoined ? '<span class="my-badge">✔내 참석</span>' : ''}
+          <span class="count-badge">${badgeText}</span>
+        </div>
+      </div>
+      <div class="names-list">${chipsHtml}</div>
+    `;
+    return slot;
+  }
+
+  async function toggleAttendance(dateKey, type) {
+    if (!currentUser) {
+      alert('먼저 화면 상단에서 [👤 내 이름]을 선택하거나 등록해 주세요!');
+      document.getElementById('userSelect').focus();
+      return;
+    }
+
+    // 최신 서버 데이터 먼저 병합 후 토글
+    if (gistId && ghToken) {
+      await syncFromServer(true);
+    }
+
+    if (!dbData.schedule[dateKey]) {
+      dbData.schedule[dateKey] = { lunch: [], dinner: [] };
+    }
+    const arr = dbData.schedule[dateKey][type];
+    const idx = arr.indexOf(currentUser);
+    if (idx === -1) {
+      arr.push(currentUser);
+    } else {
+      arr.splice(idx, 1);
+    }
+
+    renderCalendar();
+    await saveToServer();
+  }
+
+  async function syncFromServer(silent = false) {
+    if (!gistId || !ghToken) return;
+    if (!silent) showToast('실시간 일정 불러오는 중...');
+    try {
+      const res = await fetch(`https://api.github.com/gists/${gistId}?t=${Date.now()}`, {
+        headers: { 'Authorization': `Bearer ${ghToken}` },
+        cache: 'no-store'
+      });
+      if (!res.ok) throw new Error('불러오기 실패');
+      const data = await res.json();
+      if (data.files && data.files['boardgame_calendar.json']) {
+        dbData = JSON.parse(data.files['boardgame_calendar.json'].content);
+        renderUserSelect();
+        renderCalendar();
+        if (!silent) showToast('최신 일정 반영 완료!');
+      }
+    } catch (e) {
+      console.error(e);
+      if (!silent) showToast('서버 연동 오류 (설정값을 확인하세요)');
+    }
+  }
+
+  async function saveToServer() {
+    localStorage.setItem('bg_demo_data', JSON.stringify(dbData));
+    if (!gistId || !ghToken) return;
+    showToast('실시간 저장 중...');
+    try {
+      const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${ghToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          files: {
+            'boardgame_calendar.json': {
+              content: JSON.stringify(dbData, null, 2)
+            }
+          }
+        })
+      });
+      if (!res.ok) throw new Error('저장 실패');
+      showToast('저장 완료!');
+    } catch (e) {
+      console.error(e);
+      showToast('저장 중 오류가 발생했습니다.');
+    }
+  }
+
+  function openSetupModal() {
+    document.getElementById('tokenInput').value = ghToken;
+    document.getElementById('gistInput').value = gistId;
+    if (gistId && ghToken) showShareLink();
+    document.getElementById('setupModal').classList.add('active');
+  }
+
+  function closeSetupModal() {
+    document.getElementById('setupModal').classList.remove('active');
+  }
+
+  async function createNewGistDB() {
+    const token = document.getElementById('tokenInput').value.trim();
+    if (!token) return alert('GitHub Token을 입력해 주세요.');
+    showToast('동아리 전용 DB 생성 중...');
+    try {
+      const res = await fetch('https://api.github.com/gists', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          description: 'Boardgame Club Calendar DB',
+          public: false,
+          files: {
+            'boardgame_calendar.json': {
+              content: JSON.stringify(dbData, null, 2)
+            }
+          }
+        })
+      });
+      if (!res.ok) throw new Error('토큰 권한을 확인해주세요');
+      const data = await res.json();
+      ghToken = token;
+      gistId = data.id;
+      localStorage.setItem('bg_gh_token', ghToken);
+      localStorage.setItem('bg_gist_id', gistId);
+      document.getElementById('gistInput').value = gistId;
+      showShareLink();
+      showToast('동아리 DB 생성 완료!');
+    } catch (e) {
+      alert('생성 실패: 토큰 값과 gist 체크 여부를 확인해 주세요.');
+    }
+  }
+
+  function saveManualConfig() {
+    ghToken = document.getElementById('tokenInput').value.trim();
+    gistId = document.getElementById('gistInput').value.trim();
+    localStorage.setItem('bg_gh_token', ghToken);
+    localStorage.setItem('bg_gist_id', gistId);
+    showShareLink();
+    syncFromServer();
+  }
+
+  function showShareLink() {
+    const baseUrl = location.origin + location.pathname;
+    const shareUrl = `${baseUrl}#gist=${gistId}&key=${btoa(ghToken)}`;
+    document.getElementById('shareUrlText').textContent = shareUrl;
+    document.getElementById('shareUrlBox').style.display = 'block';
+  }
+
+  function copyShareUrl() {
+    const text = document.getElementById('shareUrlText').textContent;
+    navigator.clipboard.writeText(text);
+    alert('플로우(Flow) 공지용 링크가 복사되었습니다! 이 링크로 접속한 동아리원은 별도 설정 없이 바로 달력을 쓸 수 있습니다.');
+  }
+
+  function formatDate(y, m, d) {
+    return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+
+  init();
+</script>
+</body>
+</html>
