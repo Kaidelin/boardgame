@@ -50,6 +50,8 @@
     .btn:hover { background: #f1f5f9; }
     .btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
     .btn-primary:hover { background: #1d4ed8; }
+    .btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+    .btn-danger:hover { background: #fecaca; }
     .month-nav { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; font-weight: 700; }
 
     /* 범례 */
@@ -134,23 +136,45 @@
       background: #2563eb; color: #fff; border-color: #2563eb; font-weight: 700;
     }
 
-    /* 초기 설정 모달 */
+    /* 모달 공통 */
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(15,23,42,0.6);
       display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px;
     }
     .modal-backdrop.active { display: flex; }
     .modal {
-      background: #fff; max-width: 520px; width: 100%; border-radius: 14px; padding: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      background: #fff; max-width: 540px; width: 100%; border-radius: 14px; padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto;
     }
     .modal h2 { margin-top: 0; font-size: 1.15rem; }
-    .modal p { font-size: 0.88rem; color: #475569; line-height: 1.5; }
-    .modal input { width: 100%; padding: 9px 12px; margin: 6px 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
+    .modal p { font-size: 0.86rem; color: #475569; line-height: 1.5; }
+    .modal input[type="text"], .modal input[type="password"] {
+      width: 100%; padding: 9px 12px; margin: 6px 0 14px; border: 1px solid #cbd5e1; border-radius: 8px;
+    }
     .share-box {
       background: #f1f5f9; padding: 10px; border-radius: 8px; font-size: 0.8rem;
       word-break: break-all; margin-top: 10px; border: 1px dashed #94a3b8;
     }
+
+    /* 명단 관리 리스트 */
+    .member-add-row {
+      display: flex; gap: 8px; margin-bottom: 14px;
+    }
+    .member-add-row input {
+      flex: 1; margin: 0 !important;
+    }
+    .member-list-box {
+      border: 1px solid #e2e8f0; border-radius: 10px; max-height: 280px; overflow-y: auto;
+      padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px;
+    }
+    .member-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0;
+    }
+    .member-item-name { font-weight: 600; font-size: 0.92rem; }
+    .member-item-actions { display: flex; gap: 6px; }
+    .btn-sm { padding: 4px 8px; font-size: 0.78rem; border-radius: 6px; }
+
     .status-toast {
       position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff;
       padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; display: none; z-index: 200;
@@ -192,7 +216,8 @@
         <option value="">-- 본인 이름 선택 --</option>
       </select>
       <button class="btn" onclick="addNewMember()">+ 내 이름 등록</button>
-      <span style="font-size:0.82rem;color:#64748b;">(이름 선택 후 달력의 점심/저녁 칸을 클릭하세요)</span>
+      <button class="btn btn-primary" onclick="openMemberModal()">👥 명단 관리</button>
+      <span style="font-size:0.82rem;color:#64748b;">(이름 선택 후 달력의 점심/저녁 칸 클릭)</span>
     </div>
 
     <div class="month-nav">
@@ -207,7 +232,29 @@
   <div id="calendarGrid" class="calendar-grid"></div>
 </div>
 
-<!-- 초기 설정 & 플로우 링크 생성 모달 -->
+<!-- [모달 1] 동아리원 명단 관리 모달 -->
+<div class="modal-backdrop" id="memberModal">
+  <div class="modal">
+    <h2>👥 동아리원 명단 관리 (<span id="memberCountLabel">0</span>명)</h2>
+    <p>
+      새 동아리원을 한 번에 여러 명 추가하거나(쉼표 <code>,</code>로 구분), 기존 이름(김보드 등)을 수정·삭제할 수 있습니다. 변경 즉시 서버에 자동 저장됩니다.
+    </p>
+
+    <div class="member-add-row">
+      <input type="text" id="bulkMemberInput" placeholder="예: 홍길동, 김철수, 이영희 (엔터 또는 추가 클릭)" onkeydown="if(event.key==='Enter') addBulkMembers()">
+      <button class="btn btn-primary" onclick="addBulkMembers()">+ 명단 추가</button>
+    </div>
+
+    <div class="member-list-box" id="memberListBox"></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-danger btn-sm" onclick="removeSampleMembers()">🧹 기본 샘플 이름(김보드 등) 한 번에 지우기</button>
+      <button class="btn" onclick="closeMemberModal()" style="margin-left:auto;">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- [모달 2] 초기 설정 & 플로우 링크 생성 모달 -->
 <div class="modal-backdrop" id="setupModal">
   <div class="modal">
     <h2>⚙️ GitHub 실시간 저장소 연동 (총무 전용 1회 설정)</h2>
@@ -239,19 +286,20 @@
 
 <script>
   const GOAL_COUNT = 4; // 4인 이상 성사 기준
+  const SAMPLE_NAMES = ['김성욱', '김지원', '류종혁', '안슬기', '이하림', '차승휘'];
+
   let currentYear = new Date().getFullYear();
   let currentMonth = new Date().getMonth();
   let currentUser = localStorage.getItem('bg_user') || '';
   let gistId = localStorage.getItem('bg_gist_id') || '';
   let ghToken = localStorage.getItem('bg_gh_token') || '';
 
-  // 데이터 구조: { members: ['홍길동', ...], schedule: { '2026-10-15': { lunch: ['홍길동'], dinner: [] } } }
+  // 기본 데이터 구조
   let dbData = {
-    members: ['김성욱', '김지원', '류종혁', '성인제', '안슬기', '이하림', '차승휘'],
+    members: [],
     schedule: {}
   };
 
-  // URL 해시(#gist=...&key=...)로 접속 시 자동 세팅 (동아리원 원클릭 접속용)
   function checkUrlHashConfig() {
     if (location.hash && location.hash.includes('gist=')) {
       const params = new URLSearchParams(location.hash.substring(1));
@@ -274,8 +322,12 @@
       await syncFromServer();
     } else {
       const savedLocal = localStorage.getItem('bg_demo_data');
-      if (savedLocal) dbData = JSON.parse(savedLocal);
+      if (savedLocal) {
+        dbData = JSON.parse(savedLocal);
+      }
     }
+    if (!Array.isArray(dbData.members)) dbData.members = [];
+    if (!dbData.schedule) dbData.schedule = {};
     renderUserSelect();
     renderCalendar();
   }
@@ -291,7 +343,11 @@
   function renderUserSelect() {
     const sel = document.getElementById('userSelect');
     sel.innerHTML = '<option value="">-- 본인 이름 선택 --</option>';
-    dbData.members.sort().forEach(name => {
+    if (currentUser && !dbData.members.includes(currentUser)) {
+      currentUser = '';
+      localStorage.removeItem('bg_user');
+    }
+    dbData.members.slice().sort().forEach(name => {
       const opt = document.createElement('option');
       opt.value = name;
       opt.textContent = name;
@@ -307,8 +363,10 @@
   }
 
   async function addNewMember() {
-    const name = prompt('동아리원 이름(또는 닉네임)을 입력하세요:');
+    const name = prompt('등록할 동아리원 이름(또는 닉네임)을 입력하세요:');
     if (!name || !name.trim()) return;
+    if (gistId && ghToken) await syncFromServer(true);
+
     const clean = name.trim();
     if (!dbData.members.includes(clean)) {
       dbData.members.push(clean);
@@ -319,6 +377,181 @@
     renderCalendar();
     await saveToServer();
   }
+
+  /* ================== 명단 관리 모달 기능 ================== */
+  async function openMemberModal() {
+    if (gistId && ghToken) await syncFromServer(true);
+    renderMemberModalList();
+    document.getElementById('memberModal').classList.add('active');
+  }
+
+  function closeMemberModal() {
+    document.getElementById('memberModal').classList.remove('active');
+  }
+
+  function renderMemberModalList() {
+    const box = document.getElementById('memberListBox');
+    const sorted = dbData.members.slice().sort();
+    document.getElementById('memberCountLabel').textContent = sorted.length;
+
+    if (sorted.length === 0) {
+      box.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:24px 0;font-size:0.88rem;">등록된 동아리원이 없습니다. 위 입력창에서 이름을 추가해 주세요.</div>';
+      return;
+    }
+
+    box.innerHTML = '';
+    sorted.forEach(name => {
+      const row = document.createElement('div');
+      row.className = 'member-item';
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'member-item-name';
+      nameSpan.textContent = name + (name === currentUser ? ' (나)' : '');
+
+      const actions = document.createElement('div');
+      actions.className = 'member-item-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn btn-sm';
+      editBtn.textContent = '✏️ 이름 수정';
+      editBtn.onclick = () => renameMember(name);
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn btn-danger btn-sm';
+      delBtn.textContent = '🗑️ 삭제';
+      delBtn.onclick = () => deleteMember(name);
+
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      row.appendChild(nameSpan);
+      row.appendChild(actions);
+      box.appendChild(row);
+    });
+  }
+
+  async function addBulkMembers() {
+    const input = document.getElementById('bulkMemberInput');
+    const raw = input.value.trim();
+    if (!raw) return;
+
+    if (gistId && ghToken) await syncFromServer(true);
+
+    // 쉼표, 줄바꿈, 공백 등으로 분리
+    const names = raw.split(/[,，\n\t]+/).map(s => s.trim()).filter(Boolean);
+    let addedCount = 0;
+    names.forEach(n => {
+      if (!dbData.members.includes(n)) {
+        dbData.members.push(n);
+        addedCount++;
+      }
+    });
+
+    input.value = '';
+    renderMemberModalList();
+    renderUserSelect();
+    renderCalendar();
+    await saveToServer();
+    showToast(`${addedCount}명의 명단이 추가되었습니다!`);
+  }
+
+  async function renameMember(oldName) {
+    const newName = prompt(`[${oldName}] 님의 새로운 이름을 입력하세요:`, oldName);
+    if (!newName || !newName.trim() || newName.trim() === oldName) return;
+    const cleanNew = newName.trim();
+
+    if (gistId && ghToken) await syncFromServer(true);
+
+    // 1. 명단 배열에서 교체
+    const idx = dbData.members.indexOf(oldName);
+    if (idx !== -1) {
+      if (dbData.members.includes(cleanNew)) {
+        dbData.members.splice(idx, 1); // 이미 새 이름이 있으면 중복 제거
+      } else {
+        dbData.members[idx] = cleanNew;
+      }
+    }
+
+    // 2. 기존 달력 출석 기록에서도 일괄 변경
+    Object.keys(dbData.schedule).forEach(dateKey => {
+      ['lunch', 'dinner'].forEach(slot => {
+        const arr = dbData.schedule[dateKey][slot];
+        if (Array.isArray(arr)) {
+          const sIdx = arr.indexOf(oldName);
+          if (sIdx !== -1) {
+            if (arr.includes(cleanNew)) arr.splice(sIdx, 1);
+            else arr[sIdx] = cleanNew;
+          }
+        }
+      });
+    });
+
+    if (currentUser === oldName) {
+      currentUser = cleanNew;
+      localStorage.setItem('bg_user', cleanNew);
+    }
+
+    renderMemberModalList();
+    renderUserSelect();
+    renderCalendar();
+    await saveToServer();
+    showToast(`'${oldName}' → '${cleanNew}' 변경 완료!`);
+  }
+
+  async function deleteMember(targetName) {
+    if (!confirm(`[${targetName}] 님을 동아리 명단과 달력 출석 기록에서 삭제할까요?`)) return;
+
+    if (gistId && ghToken) await syncFromServer(true);
+
+    dbData.members = dbData.members.filter(n => n !== targetName);
+
+    // 달력 출석 기록에서도 해당 이름 제거
+    Object.keys(dbData.schedule).forEach(dateKey => {
+      ['lunch', 'dinner'].forEach(slot => {
+        if (Array.isArray(dbData.schedule[dateKey][slot])) {
+          dbData.schedule[dateKey][slot] = dbData.schedule[dateKey][slot].filter(n => n !== targetName);
+        }
+      });
+    });
+
+    if (currentUser === targetName) {
+      currentUser = '';
+      localStorage.removeItem('bg_user');
+    }
+
+    renderMemberModalList();
+    renderUserSelect();
+    renderCalendar();
+    await saveToServer();
+    showToast(`'${targetName}' 삭제 완료!`);
+  }
+
+  async function removeSampleMembers() {
+    if (gistId && ghToken) await syncFromServer(true);
+
+    const beforeLen = dbData.members.length;
+    dbData.members = dbData.members.filter(n => !SAMPLE_NAMES.includes(n));
+
+    Object.keys(dbData.schedule).forEach(dateKey => {
+      ['lunch', 'dinner'].forEach(slot => {
+        if (Array.isArray(dbData.schedule[dateKey][slot])) {
+          dbData.schedule[dateKey][slot] = dbData.schedule[dateKey][slot].filter(n => !SAMPLE_NAMES.includes(n));
+        }
+      });
+    });
+
+    if (SAMPLE_NAMES.includes(currentUser)) {
+      currentUser = '';
+      localStorage.removeItem('bg_user');
+    }
+
+    const removed = beforeLen - dbData.members.length;
+    renderMemberModalList();
+    renderUserSelect();
+    renderCalendar();
+    await saveToServer();
+    showToast(removed > 0 ? `샘플 이름 ${removed}개를 모두 삭제했습니다!` : '남아있는 샘플 이름이 없습니다.');
+  }
+  /* ========================================================= */
 
   function moveMonth(delta) {
     currentMonth += delta;
@@ -356,7 +589,6 @@
     const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
     const todayStr = formatDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
 
-    // 앞쪽 빈 칸 채우기
     if (!weekdaysOnly) {
       for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement('div');
@@ -364,7 +596,6 @@
         grid.appendChild(empty);
       }
     } else {
-      // 평일만 보기일 때 1일이 화~금이면 앞 빈칸 추가
       if (firstDay >= 2 && firstDay <= 5) {
         for (let i = 1; i < firstDay; i++) {
           const empty = document.createElement('div');
@@ -447,7 +678,6 @@
       return;
     }
 
-    // 최신 서버 데이터 먼저 병합 후 토글
     if (gistId && ghToken) {
       await syncFromServer(true);
     }
@@ -479,6 +709,9 @@
       const data = await res.json();
       if (data.files && data.files['boardgame_calendar.json']) {
         dbData = JSON.parse(data.files['boardgame_calendar.json'].content);
+        if (!Array.isArray(dbData.members)) dbData.members = [];
+        if (!dbData.schedule) dbData.schedule = {};
+        localStorage.setItem('bg_demo_data', JSON.stringify(dbData));
         renderUserSelect();
         renderCalendar();
         if (!silent) showToast('최신 일정 반영 완료!');
