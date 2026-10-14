@@ -44,19 +44,20 @@
     }
     .user-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .user-box select, .user-box input, .btn {
-      padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background: #fff;
+      padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; background: #fff;
     }
     .btn { cursor: pointer; font-weight: 600; transition: 0.15s; }
     .btn:hover { background: #f1f5f9; }
     .btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
     .btn-primary:hover { background: #1d4ed8; }
+    .btn-mail-on { background: #fef3c7; color: #b45309; border-color: #fde68a; }
     .btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
     .btn-danger:hover { background: #fecaca; }
     .month-nav { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; font-weight: 700; }
 
     /* 범례 */
     .legend {
-      display: flex; gap: 14px; font-size: 0.82rem; color: var(--sub); align-items: center; flex-wrap: wrap;
+      display: flex; gap: 12px; font-size: 0.82rem; color: var(--sub); align-items: center; flex-wrap: wrap;
     }
     .legend span { display: inline-flex; align-items: center; gap: 5px; }
     .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
@@ -98,11 +99,9 @@
     }
     .slot:hover { border-color: #94a3b8; transform: translateY(-1px); }
 
-    /* 4인 이상 성사 스타일 */
     .slot.confirmed {
       background: var(--ready-bg); border-color: var(--ready-border);
     }
-    /* 나의 참석 스타일 (최우선 테두리 강조) */
     .slot.my-joined {
       border: 2.5px solid var(--my-border);
       box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
@@ -143,13 +142,14 @@
     }
     .modal-backdrop.active { display: flex; }
     .modal {
-      background: #fff; max-width: 540px; width: 100%; border-radius: 14px; padding: 24px;
+      background: #fff; max-width: 580px; width: 100%; border-radius: 14px; padding: 24px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto;
     }
     .modal h2 { margin-top: 0; font-size: 1.15rem; }
-    .modal p { font-size: 0.86rem; color: #475569; line-height: 1.5; }
-    .modal input[type="text"], .modal input[type="password"] {
-      width: 100%; padding: 9px 12px; margin: 6px 0 14px; border: 1px solid #cbd5e1; border-radius: 8px;
+    .modal h3 { margin: 18px 0 8px; font-size: 1rem; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+    .modal p { font-size: 0.85rem; color: #475569; line-height: 1.5; margin: 6px 0 12px; }
+    .modal input[type="text"], .modal input[type="password"], .modal input[type="email"] {
+      width: 100%; padding: 9px 12px; margin: 4px 0 12px; border: 1px solid #cbd5e1; border-radius: 8px;
     }
     .share-box {
       background: #f1f5f9; padding: 10px; border-radius: 8px; font-size: 0.8rem;
@@ -157,23 +157,21 @@
     }
 
     /* 명단 관리 리스트 */
-    .member-add-row {
-      display: flex; gap: 8px; margin-bottom: 14px;
-    }
-    .member-add-row input {
-      flex: 1; margin: 0 !important;
-    }
+    .member-add-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .member-add-row input { flex: 1; margin: 0 !important; }
     .member-list-box {
-      border: 1px solid #e2e8f0; border-radius: 10px; max-height: 280px; overflow-y: auto;
+      border: 1px solid #e2e8f0; border-radius: 10px; max-height: 300px; overflow-y: auto;
       padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px;
     }
     .member-item {
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
       background: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0;
     }
+    .member-info { display: flex; flex-direction: column; gap: 2px; }
     .member-item-name { font-weight: 600; font-size: 0.92rem; }
-    .member-item-actions { display: flex; gap: 6px; }
-    .btn-sm { padding: 4px 8px; font-size: 0.78rem; border-radius: 6px; }
+    .member-item-email { font-size: 0.76rem; color: #64748b; }
+    .member-item-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+    .btn-sm { padding: 4px 8px; font-size: 0.76rem; border-radius: 6px; }
 
     .status-toast {
       position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff;
@@ -193,7 +191,7 @@
   <!-- 상단 요약 바 -->
   <div class="header">
     <div class="title-area">
-      <h1>🎲 폭탄해체팀 월간 캘린더</h1>
+      <h1>🎲 폭탄해체팀 캘린더</h1>
       <span class="badge-stat green" id="statConfirmed">이번 달 4인 성사: 0타임</span>
       <span class="badge-stat blue" id="statMyCount">나의 참석 예정: 0타임</span>
     </div>
@@ -204,7 +202,7 @@
         <input type="checkbox" id="hideWeekends" onchange="renderCalendar()"> 평일(월~금)만 보기
       </label>
       <button class="btn" onclick="syncFromServer()">🔄 새로고침</button>
-      <button class="btn" onclick="openSetupModal()">⚙️ 동아리 연동 설정</button>
+      <button class="btn" onclick="openSetupModal()">⚙️ 연동 및 설정</button>
     </div>
   </div>
 
@@ -216,8 +214,8 @@
         <option value="">-- 본인 이름 선택 --</option>
       </select>
       <button class="btn" onclick="addNewMember()">+ 내 이름 등록</button>
+      <button class="btn" id="myMailBtn" onclick="setMyEmailPrompt()">🔔 내 메일 알림</button>
       <button class="btn btn-primary" onclick="openMemberModal()">👥 명단 관리</button>
-      <span style="font-size:0.82rem;color:#64748b;">(이름 선택 후 달력의 점심/저녁 칸 클릭)</span>
     </div>
 
     <div class="month-nav">
@@ -232,50 +230,49 @@
   <div id="calendarGrid" class="calendar-grid"></div>
 </div>
 
-<!-- [모달 1] 동아리원 명단 관리 모달 -->
+<!-- [모달 1] 동아리원 명단 & 이메일 관리 모달 -->
 <div class="modal-backdrop" id="memberModal">
   <div class="modal">
-    <h2>👥 동아리원 명단 관리 (<span id="memberCountLabel">0</span>명)</h2>
+    <h2>👥 동아리원 명단 및 이메일 관리 (<span id="memberCountLabel">0</span>명)</h2>
     <p>
-      새 동아리원을 한 번에 여러 명 추가하거나(쉼표 <code>,</code>로 구분), 기존 이름(김보드 등)을 수정·삭제할 수 있습니다. 변경 즉시 서버에 자동 저장됩니다.
+      동아리원 이름을 추가하거나 각자의 <b>알림 수신용 이메일</b>을 등록할 수 있습니다. 이메일을 등록해 두면 아침 9시 당일 안내 메일이 해당 주소로 발송됩니다.
     </p>
 
     <div class="member-add-row">
-      <input type="text" id="bulkMemberInput" placeholder="예: 홍길동, 김철수, 이영희 (엔터 또는 추가 클릭)" onkeydown="if(event.key==='Enter') addBulkMembers()">
+      <input type="text" id="bulkMemberInput" placeholder="예: 홍길동, 김철수, 이영희 (쉼표로 구분)" onkeydown="if(event.key==='Enter') addBulkMembers()">
       <button class="btn btn-primary" onclick="addBulkMembers()">+ 명단 추가</button>
     </div>
 
     <div class="member-list-box" id="memberListBox"></div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-danger btn-sm" onclick="removeSampleMembers()">🧹 기본 샘플 이름(김보드 등) 한 번에 지우기</button>
+      <button class="btn btn-danger btn-sm" onclick="removeSampleMembers()">🧹 기본 샘플 이름(김보드 등) 지우기</button>
       <button class="btn" onclick="closeMemberModal()" style="margin-left:auto;">닫기</button>
     </div>
   </div>
 </div>
 
-<!-- [모달 2] 초기 설정 & 플로우 링크 생성 모달 -->
+<!-- [모달 2] 초기 설정 모달 -->
 <div class="modal-backdrop" id="setupModal">
   <div class="modal">
-    <h2>⚙️ GitHub 실시간 저장소 연동 (총무 전용 1회 설정)</h2>
+    <h2>⚙️ GitHub 저장소 설정 (총무 전용)</h2>
     <p>
-      1. GitHub 우측 상단 프로필 &gt; <b>Settings &gt; Developer settings &gt; Personal access tokens &gt; Tokens (classic)</b>에서 <b><code>gist</code></b> 권한만 체크해 토큰을 발급받으세요.<br>
-      2. 아래에 토큰을 붙여넣고 <b>[새 동아리 DB 자동 생성]</b>을 누르면 플로우(Flow) 공지용 링크가 바로 만들어집니다.
+      GitHub Settings &gt; Developer settings &gt; Personal access tokens (classic)에서 <code>gist</code> 권한 체크 후 발급받은 토큰을 입력하세요.
     </p>
-    <label style="font-size:0.85rem;font-weight:700;">GitHub Token (ghp_...)</label>
+    <label style="font-size:0.82rem;font-weight:700;">GitHub Token (ghp_...)</label>
     <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
 
-    <label style="font-size:0.85rem;font-weight:700;">Gist ID (자동 생성 시 비워두세요)</label>
-    <input type="text" id="gistInput" placeholder="새로 만들려면 비워두고 아래 파란 버튼을 누르세요">
+    <label style="font-size:0.82rem;font-weight:700;">Gist ID (자동 생성 시 비워두세요)</label>
+    <input type="text" id="gistInput" placeholder="새로 만들려면 비워두고 [새 동아리 DB 자동 생성] 클릭">
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
       <button class="btn btn-primary" onclick="createNewGistDB()">✨ 새 동아리 DB 자동 생성</button>
-      <button class="btn" onclick="saveManualConfig()">기존 ID로 저장</button>
+      <button class="btn" onclick="saveManualConfig()">저장소 설정 저장</button>
       <button class="btn" onclick="closeSetupModal()" style="margin-left:auto;">닫기</button>
     </div>
 
-    <div id="shareUrlBox" style="display:none;margin-top:16px;">
-      <strong style="font-size:0.85rem;color:#15803d;">✅ 연동 완료! 아래 링크를 플로우(Flow) 공지에 등록하세요:</strong>
+    <div id="shareUrlBox" style="display:none;margin-top:14px;">
+      <strong style="font-size:0.84rem;color:#15803d;">✅ 플로우(Flow) 공지용 전용 링크:</strong>
       <div class="share-box" id="shareUrlText"></div>
       <button class="btn btn-primary" style="margin-top:8px;width:100%;" onclick="copyShareUrl()">📋 플로우 공지용 링크 복사하기</button>
     </div>
@@ -286,7 +283,7 @@
 
 <script>
   const GOAL_COUNT = 4; // 4인 이상 성사 기준
-  const SAMPLE_NAMES = ['김성욱', '김지원', '류종혁', '안슬기', '이하림', '차승휘'];
+  const SAMPLE_NAMES = ['김보드', '이게임', '박전략', '최파티'];
 
   let currentYear = new Date().getFullYear();
   let currentMonth = new Date().getMonth();
@@ -294,9 +291,9 @@
   let gistId = localStorage.getItem('bg_gist_id') || '';
   let ghToken = localStorage.getItem('bg_gh_token') || '';
 
-  // 기본 데이터 구조
   let dbData = {
     members: [],
+    emails: {},
     schedule: {}
   };
 
@@ -316,23 +313,26 @@
     }
   }
 
+  function ensureDbStructure() {
+    if (!Array.isArray(dbData.members)) dbData.members = [];
+    if (!dbData.emails || typeof dbData.emails !== 'object') dbData.emails = {};
+    if (!dbData.schedule || typeof dbData.schedule !== 'object') dbData.schedule = {};
+  }
+
   async function init() {
     checkUrlHashConfig();
     if (gistId && ghToken) {
       await syncFromServer();
     } else {
       const savedLocal = localStorage.getItem('bg_demo_data');
-      if (savedLocal) {
-        dbData = JSON.parse(savedLocal);
-      }
+      if (savedLocal) dbData = JSON.parse(savedLocal);
     }
-    if (!Array.isArray(dbData.members)) dbData.members = [];
-    if (!dbData.schedule) dbData.schedule = {};
+    ensureDbStructure();
     renderUserSelect();
     renderCalendar();
   }
 
-  function showToast(msg, ms = 1800) {
+  function showToast(msg, ms = 2200) {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.style.display = 'block';
@@ -350,16 +350,67 @@
     dbData.members.slice().sort().forEach(name => {
       const opt = document.createElement('option');
       opt.value = name;
-      opt.textContent = name;
+      const hasMail = dbData.emails[name] ? ' 🔔' : '';
+      opt.textContent = name + hasMail;
       if (name === currentUser) opt.selected = true;
       sel.appendChild(opt);
     });
+    updateMyMailButtonUI();
+  }
+
+  function updateMyMailButtonUI() {
+    const btn = document.getElementById('myMailBtn');
+    if (!currentUser) {
+      btn.textContent = '🔔 내 메일 알림';
+      btn.className = 'btn';
+      return;
+    }
+    const myMail = dbData.emails[currentUser];
+    if (myMail) {
+      btn.textContent = `🔔 알림켜짐 (${myMail})`;
+      btn.className = 'btn btn-mail-on';
+    } else {
+      btn.textContent = '🔕 내 메일 등록하기';
+      btn.className = 'btn';
+    }
   }
 
   function changeUser(val) {
     currentUser = val;
     localStorage.setItem('bg_user', val);
+    updateMyMailButtonUI();
     renderCalendar();
+  }
+
+  async function setMyEmailPrompt() {
+    if (!currentUser) {
+      alert('먼저 왼쪽에서 [👤 내 이름]을 선택해 주세요!');
+      return;
+    }
+    await editMemberEmail(currentUser);
+  }
+
+  async function editMemberEmail(memberName) {
+    if (gistId && ghToken) await syncFromServer(true);
+    const prevMail = dbData.emails[memberName] || '';
+    const input = prompt(
+      `[${memberName}] 님의 아침 9시 당일 안내 메일을 받을 이메일 주소를 입력하세요.\n(등록 해제하려면 빈칸으로 두고 확인)`,
+      prevMail
+    );
+    if (input === null) return;
+    const cleanMail = input.trim();
+    if (cleanMail) {
+      dbData.emails[memberName] = cleanMail;
+      showToast(`${memberName} 님의 알림 메일이 등록되었습니다!`);
+    } else {
+      delete dbData.emails[memberName];
+      showToast(`${memberName} 님의 알림 메일이 해제되었습니다.`);
+    }
+    renderUserSelect();
+    if (document.getElementById('memberModal').classList.contains('active')) {
+      renderMemberModalList();
+    }
+    await saveToServer();
   }
 
   async function addNewMember() {
@@ -373,12 +424,17 @@
     }
     currentUser = clean;
     localStorage.setItem('bg_user', clean);
+
+    const mail = prompt(`[${clean}] 님, 아침 9시 모임 안내 메일을 받으실 이메일 주소를 입력하세요 (건너뛰려면 취소):`);
+    if (mail && mail.trim()) {
+      dbData.emails[clean] = mail.trim();
+    }
+
     renderUserSelect();
     renderCalendar();
     await saveToServer();
   }
 
-  /* ================== 명단 관리 모달 기능 ================== */
   async function openMemberModal() {
     if (gistId && ghToken) await syncFromServer(true);
     renderMemberModalList();
@@ -395,7 +451,7 @@
     document.getElementById('memberCountLabel').textContent = sorted.length;
 
     if (sorted.length === 0) {
-      box.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:24px 0;font-size:0.88rem;">등록된 동아리원이 없습니다. 위 입력창에서 이름을 추가해 주세요.</div>';
+      box.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:24px 0;font-size:0.88rem;">등록된 동아리원이 없습니다.</div>';
       return;
     }
 
@@ -404,12 +460,29 @@
       const row = document.createElement('div');
       row.className = 'member-item';
 
+      const info = document.createElement('div');
+      info.className = 'member-info';
+
       const nameSpan = document.createElement('span');
       nameSpan.className = 'member-item-name';
       nameSpan.textContent = name + (name === currentUser ? ' (나)' : '');
 
+      const emailSpan = document.createElement('span');
+      emailSpan.className = 'member-item-email';
+      const mailAddr = dbData.emails[name];
+      emailSpan.textContent = mailAddr ? `🔔 ${mailAddr}` : '🔕 이메일 미등록';
+      if (mailAddr) emailSpan.style.color = '#15803d';
+
+      info.appendChild(nameSpan);
+      info.appendChild(emailSpan);
+
       const actions = document.createElement('div');
       actions.className = 'member-item-actions';
+
+      const mailBtn = document.createElement('button');
+      mailBtn.className = 'btn btn-sm';
+      mailBtn.textContent = '📧 메일 설정';
+      mailBtn.onclick = () => editMemberEmail(name);
 
       const editBtn = document.createElement('button');
       editBtn.className = 'btn btn-sm';
@@ -421,9 +494,11 @@
       delBtn.textContent = '🗑️ 삭제';
       delBtn.onclick = () => deleteMember(name);
 
+      actions.appendChild(mailBtn);
       actions.appendChild(editBtn);
       actions.appendChild(delBtn);
-      row.appendChild(nameSpan);
+
+      row.appendChild(info);
       row.appendChild(actions);
       box.appendChild(row);
     });
@@ -435,8 +510,6 @@
     if (!raw) return;
 
     if (gistId && ghToken) await syncFromServer(true);
-
-    // 쉼표, 줄바꿈, 공백 등으로 분리
     const names = raw.split(/[,，\n\t]+/).map(s => s.trim()).filter(Boolean);
     let addedCount = 0;
     names.forEach(n => {
@@ -451,7 +524,7 @@
     renderUserSelect();
     renderCalendar();
     await saveToServer();
-    showToast(`${addedCount}명의 명단이 추가되었습니다!`);
+    showToast(`${addedCount}명 추가 완료!`);
   }
 
   async function renameMember(oldName) {
@@ -460,18 +533,17 @@
     const cleanNew = newName.trim();
 
     if (gistId && ghToken) await syncFromServer(true);
-
-    // 1. 명단 배열에서 교체
     const idx = dbData.members.indexOf(oldName);
     if (idx !== -1) {
-      if (dbData.members.includes(cleanNew)) {
-        dbData.members.splice(idx, 1); // 이미 새 이름이 있으면 중복 제거
-      } else {
-        dbData.members[idx] = cleanNew;
-      }
+      if (dbData.members.includes(cleanNew)) dbData.members.splice(idx, 1);
+      else dbData.members[idx] = cleanNew;
     }
 
-    // 2. 기존 달력 출석 기록에서도 일괄 변경
+    if (dbData.emails[oldName]) {
+      dbData.emails[cleanNew] = dbData.emails[oldName];
+      delete dbData.emails[oldName];
+    }
+
     Object.keys(dbData.schedule).forEach(dateKey => {
       ['lunch', 'dinner'].forEach(slot => {
         const arr = dbData.schedule[dateKey][slot];
@@ -494,17 +566,15 @@
     renderUserSelect();
     renderCalendar();
     await saveToServer();
-    showToast(`'${oldName}' → '${cleanNew}' 변경 완료!`);
   }
 
   async function deleteMember(targetName) {
-    if (!confirm(`[${targetName}] 님을 동아리 명단과 달력 출석 기록에서 삭제할까요?`)) return;
-
+    if (!confirm(`[${targetName}] 님을 삭제하시겠습니까?`)) return;
     if (gistId && ghToken) await syncFromServer(true);
 
     dbData.members = dbData.members.filter(n => n !== targetName);
+    delete dbData.emails[targetName];
 
-    // 달력 출석 기록에서도 해당 이름 제거
     Object.keys(dbData.schedule).forEach(dateKey => {
       ['lunch', 'dinner'].forEach(slot => {
         if (Array.isArray(dbData.schedule[dateKey][slot])) {
@@ -522,14 +592,12 @@
     renderUserSelect();
     renderCalendar();
     await saveToServer();
-    showToast(`'${targetName}' 삭제 완료!`);
   }
 
   async function removeSampleMembers() {
     if (gistId && ghToken) await syncFromServer(true);
-
-    const beforeLen = dbData.members.length;
     dbData.members = dbData.members.filter(n => !SAMPLE_NAMES.includes(n));
+    SAMPLE_NAMES.forEach(s => delete dbData.emails[s]);
 
     Object.keys(dbData.schedule).forEach(dateKey => {
       ['lunch', 'dinner'].forEach(slot => {
@@ -544,14 +612,12 @@
       localStorage.removeItem('bg_user');
     }
 
-    const removed = beforeLen - dbData.members.length;
     renderMemberModalList();
     renderUserSelect();
     renderCalendar();
     await saveToServer();
-    showToast(removed > 0 ? `샘플 이름 ${removed}개를 모두 삭제했습니다!` : '남아있는 샘플 이름이 없습니다.');
+    showToast('샘플 이름을 삭제했습니다!');
   }
-  /* ========================================================= */
 
   function moveMonth(delta) {
     currentMonth += delta;
@@ -595,13 +661,11 @@
         empty.className = 'day-cell empty';
         grid.appendChild(empty);
       }
-    } else {
-      if (firstDay >= 2 && firstDay <= 5) {
-        for (let i = 1; i < firstDay; i++) {
-          const empty = document.createElement('div');
-          empty.className = 'day-cell empty';
-          grid.appendChild(empty);
-        }
+    } else if (firstDay >= 2 && firstDay <= 5) {
+      for (let i = 1; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'day-cell empty';
+        grid.appendChild(empty);
       }
     }
 
@@ -678,9 +742,7 @@
       return;
     }
 
-    if (gistId && ghToken) {
-      await syncFromServer(true);
-    }
+    if (gistId && ghToken) await syncFromServer(true);
 
     if (!dbData.schedule[dateKey]) {
       dbData.schedule[dateKey] = { lunch: [], dinner: [] };
@@ -709,8 +771,7 @@
       const data = await res.json();
       if (data.files && data.files['boardgame_calendar.json']) {
         dbData = JSON.parse(data.files['boardgame_calendar.json'].content);
-        if (!Array.isArray(dbData.members)) dbData.members = [];
-        if (!dbData.schedule) dbData.schedule = {};
+        ensureDbStructure();
         localStorage.setItem('bg_demo_data', JSON.stringify(dbData));
         renderUserSelect();
         renderCalendar();
@@ -718,7 +779,7 @@
       }
     } catch (e) {
       console.error(e);
-      if (!silent) showToast('서버 연동 오류 (설정값을 확인하세요)');
+      if (!silent) showToast('서버 연동 오류');
     }
   }
 
@@ -745,7 +806,6 @@
       showToast('저장 완료!');
     } catch (e) {
       console.error(e);
-      showToast('저장 중 오류가 발생했습니다.');
     }
   }
 
@@ -781,7 +841,7 @@
           }
         })
       });
-      if (!res.ok) throw new Error('토큰 권한을 확인해주세요');
+      if (!res.ok) throw new Error('토큰 오류');
       const data = await res.json();
       ghToken = token;
       gistId = data.id;
@@ -791,7 +851,7 @@
       showShareLink();
       showToast('동아리 DB 생성 완료!');
     } catch (e) {
-      alert('생성 실패: 토큰 값과 gist 체크 여부를 확인해 주세요.');
+      alert('생성 실패: 토큰 권한을 확인해주세요.');
     }
   }
 
@@ -814,7 +874,7 @@
   function copyShareUrl() {
     const text = document.getElementById('shareUrlText').textContent;
     navigator.clipboard.writeText(text);
-    alert('플로우(Flow) 공지용 링크가 복사되었습니다! 이 링크로 접속한 동아리원은 별도 설정 없이 바로 달력을 쓸 수 있습니다.');
+    alert('플로우(Flow) 공지용 링크가 복사되었습니다!');
   }
 
   function formatDate(y, m, d) {
