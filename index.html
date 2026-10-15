@@ -21,7 +21,6 @@
     body { margin: 0; padding: 16px; background: var(--bg); color: var(--text); }
     .container { max-width: 1280px; margin: 0 auto; }
 
-    /* 상단 헤더 및 컨트롤 바 */
     .header {
       background: var(--card); padding: 16px 20px; border-radius: 12px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 14px;
@@ -36,7 +35,6 @@
     .badge-stat.green { background: var(--ready-bg); color: var(--ready-text); }
     .badge-stat.blue { background: var(--my-bg); color: var(--my-border); }
 
-    /* 사용자 선택 및 월 이동 바 */
     .toolbar {
       background: var(--card); padding: 12px 20px; border-radius: 12px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 14px;
@@ -55,14 +53,12 @@
     .btn-danger:hover { background: #fecaca; }
     .month-nav { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; font-weight: 700; }
 
-    /* 범례 */
     .legend {
       display: flex; gap: 12px; font-size: 0.82rem; color: var(--sub); align-items: center; flex-wrap: wrap;
     }
     .legend span { display: inline-flex; align-items: center; gap: 5px; }
     .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 
-    /* 달력 그리드 */
     .calendar-grid {
       display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
     }
@@ -90,7 +86,6 @@
       background: #0f172a; color: #fff; font-size: 0.7rem; padding: 1px 6px; border-radius: 4px;
     }
 
-    /* 점심 / 저녁 슬롯 버튼 */
     .slot {
       border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 8px;
       cursor: pointer; transition: all 0.12s ease; background: #f8fafc;
@@ -98,397 +93,14 @@
       user-select: none;
     }
     .slot:hover { border-color: #94a3b8; transform: translateY(-1px); }
-
-    .slot.confirmed {
-      background: var(--ready-bg); border-color: var(--ready-border);
-    }
+    .slot.confirmed { background: var(--ready-bg); border-color: var(--ready-border); }
     .slot.my-joined {
       border: 2.5px solid var(--my-border);
       box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
     }
-    .slot.my-joined:not(.confirmed) {
-      background: var(--my-bg);
-    }
+    .slot.my-joined:not(.confirmed) { background: var(--my-bg); }
 
     .slot-top {
       display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 700;
     }
-    .slot-badges { display: flex; gap: 4px; align-items: center; }
-    .count-badge {
-      font-size: 0.72rem; padding: 1px 6px; border-radius: 10px; background: #e2e8f0; color: #334155;
-    }
-    .slot.confirmed .count-badge {
-      background: #16a34a; color: #fff;
-    }
-    .my-badge {
-      font-size: 0.68rem; padding: 1px 5px; border-radius: 4px; background: #2563eb; color: #fff;
-    }
-
-    .names-list {
-      display: flex; flex-wrap: wrap; gap: 3px; font-size: 0.74rem; color: #475569; min-height: 18px;
-    }
-    .name-chip {
-      background: rgba(255,255,255,0.85); border: 1px solid #cbd5e1;
-      padding: 1px 5px; border-radius: 4px;
-    }
-    .name-chip.me {
-      background: #2563eb; color: #fff; border-color: #2563eb; font-weight: 700;
-    }
-
-    /* 모달 공통 */
-    .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(15,23,42,0.6);
-      display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px;
-    }
-    .modal-backdrop.active { display: flex; }
-    .modal {
-      background: #fff; max-width: 580px; width: 100%; border-radius: 14px; padding: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto;
-    }
-    .modal h2 { margin-top: 0; font-size: 1.15rem; }
-    .modal h3 { margin: 18px 0 8px; font-size: 1rem; border-top: 1px solid #e2e8f0; padding-top: 16px; }
-    .modal p { font-size: 0.85rem; color: #475569; line-height: 1.5; margin: 6px 0 12px; }
-    .modal input[type="text"], .modal input[type="password"], .modal input[type="email"] {
-      width: 100%; padding: 9px 12px; margin: 4px 0 12px; border: 1px solid #cbd5e1; border-radius: 8px;
-    }
-    .share-box {
-      background: #f1f5f9; padding: 10px; border-radius: 8px; font-size: 0.8rem;
-      word-break: break-all; margin-top: 10px; border: 1px dashed #94a3b8;
-    }
-
-    /* 명단 관리 리스트 */
-    .member-add-row { display: flex; gap: 8px; margin-bottom: 14px; }
-    .member-add-row input { flex: 1; margin: 0 !important; }
-    .member-list-box {
-      border: 1px solid #e2e8f0; border-radius: 10px; max-height: 300px; overflow-y: auto;
-      padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px;
-    }
-    .member-item {
-      display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
-      background: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0;
-    }
-    .member-info { display: flex; flex-direction: column; gap: 2px; }
-    .member-item-name { font-weight: 600; font-size: 0.92rem; }
-    .member-item-email { font-size: 0.76rem; color: #64748b; }
-    .member-item-actions { display: flex; gap: 5px; flex-wrap: wrap; }
-    .btn-sm { padding: 4px 8px; font-size: 0.76rem; border-radius: 6px; }
-
-    .status-toast {
-      position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff;
-      padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; display: none; z-index: 200;
-    }
-
-    @media (max-width: 900px) {
-      .calendar-grid, .calendar-grid.weekdays-only { grid-template-columns: repeat(2, 1fr); }
-      .day-header { display: none; }
-      .day-cell.empty { display: none; }
-    }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <!-- 상단 요약 바 -->
-  <div class="header">
-    <div class="title-area">
-      <h1>🎲 폭탄해체반 월간 캘린더</h1>
-      <span class="badge-stat green" id="statConfirmed">이번 달 4인 성사: 0타임</span>
-      <span class="badge-stat blue" id="statMyCount">나의 참석 예정: 0타임</span>
-    </div>
-    <div class="legend">
-      <span><i class="dot" style="background:#dcfce7;border:1.5px solid #16a34a;"></i> 4인 이상 성사!</span>
-      <span><i class="dot" style="background:#eff6ff;border:2px solid #2563eb;"></i> 내가 참석 체크한 날</span>
-      <label style="cursor:pointer;font-weight:600;color:#334155;">
-        <input type="checkbox" id="hideWeekends" onchange="renderCalendar()"> 평일(월~금)만 보기
-      </label>
-      <button class="btn" onclick="syncFromServer(false, true)">🔄 새로고침</button>
-      <button class="btn" onclick="openSetupModal()">⚙️ 연동 및 설정</button>
-    </div>
-  </div>
-
-  <!-- 내 이름 선택 및 월 이동 툴바 -->
-  <div class="toolbar">
-    <div class="user-box">
-      <strong>👤 내 이름:</strong>
-      <select id="userSelect" onchange="changeUser(this.value)">
-        <option value="">-- 본인 이름 선택 --</option>
-      </select>
-      <button class="btn" onclick="addNewMember()">+ 내 이름 등록</button>
-      <button class="btn" id="myMailBtn" onclick="setMyEmailPrompt()">🔔 내 메일 알림</button>
-      <button class="btn btn-primary" onclick="openMemberModal()">👥 명단 관리</button>
-    </div>
-
-    <div class="month-nav">
-      <button class="btn" onclick="moveMonth(-1)">◀ 이전 달</button>
-      <span id="monthLabel">2026년 10월</span>
-      <button class="btn" onclick="moveMonth(1)">다음 달 ▶</button>
-      <button class="btn" onclick="goToday()" style="font-size:0.8rem;">오늘</button>
-    </div>
-  </div>
-
-  <!-- 월간 달력 영역 -->
-  <div id="calendarGrid" class="calendar-grid"></div>
-</div>
-
-<!-- [모달 1] 동아리원 명단 & 이메일 관리 모달 -->
-<div class="modal-backdrop" id="memberModal">
-  <div class="modal">
-    <h2>👥 동아리원 명단 및 이메일 관리 (<span id="memberCountLabel">0</span>명)</h2>
-    <p>
-      동아리원 이름을 추가하거나 각자의 <b>알림 수신용 이메일</b>을 등록할 수 있습니다. 이메일을 등록해 두면 아침 9시 당일 안내 메일이 해당 주소로 발송됩니다.
-    </p>
-
-    <div class="member-add-row">
-      <input type="text" id="bulkMemberInput" placeholder="예: 홍길동, 김철수, 이영희 (쉼표로 구분)" onkeydown="if(event.key==='Enter') addBulkMembers()">
-      <button class="btn btn-primary" onclick="addBulkMembers()">+ 명단 추가</button>
-    </div>
-
-    <div class="member-list-box" id="memberListBox"></div>
-
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-danger btn-sm" onclick="removeSampleMembers()">🧹 기본 샘플 이름(김보드 등) 지우기</button>
-      <button class="btn" onclick="closeMemberModal()" style="margin-left:auto;">닫기</button>
-    </div>
-  </div>
-</div>
-
-<!-- [모달 2] 초기 설정 모달 -->
-<div class="modal-backdrop" id="setupModal">
-  <div class="modal">
-    <h2>⚙️ GitHub 저장소 설정 (총무 전용)</h2>
-    <p>
-      GitHub Settings &gt; Developer settings &gt; Personal access tokens (classic)에서 <code>gist</code> 권한 체크 후 발급받은 토큰을 입력하세요.
-    </p>
-    <label style="font-size:0.82rem;font-weight:700;">GitHub Token (ghp_...)</label>
-    <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-
-    <label style="font-size:0.82rem;font-weight:700;">Gist ID (자동 생성 시 비워두세요)</label>
-    <input type="text" id="gistInput" placeholder="새로 만들려면 비워두고 [새 동아리 DB 자동 생성] 클릭">
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-      <button class="btn btn-primary" onclick="createNewGistDB()">✨ 새 동아리 DB 자동 생성</button>
-      <button class="btn" onclick="saveManualConfig()">저장소 설정 저장</button>
-      <button class="btn" onclick="closeSetupModal()" style="margin-left:auto;">닫기</button>
-    </div>
-
-    <div id="shareUrlBox" style="display:none;margin-top:14px;">
-      <strong style="font-size:0.84rem;color:#15803d;">✅ 플로우(Flow) 공지용 전용 링크:</strong>
-      <div class="share-box" id="shareUrlText"></div>
-      <button class="btn btn-primary" style="margin-top:8px;width:100%;" onclick="copyShareUrl()">📋 플로우 공지용 링크 복사하기</button>
-    </div>
-  </div>
-</div>
-
-<div class="status-toast" id="toast">저장 중...</div>
-
-<script>
-  const GOAL_COUNT = 4; // 4인 이상 성사 기준
-  const SAMPLE_NAMES = ['김성욱', '김지원', '류종혁', '성인제', '안슬기', '이하림', '차승휘'];
-
-  let currentYear = new Date().getFullYear();
-  let currentMonth = new Date().getMonth();
-  let currentUser = localStorage.getItem('bg_user') || '';
-  let gistId = localStorage.getItem('bg_gist_id') || '';
-  let ghToken = localStorage.getItem('bg_gh_token') || '';
-
-  let dbData = {
-    members: [],
-    emails: {},
-    schedule: {}
-  };
-
-  // [핵심 개선] 최근 로컬에서 조작한 출석 내역을 보호하여 서버 캐시 지연으로 인한 증발 방지
-  // key: "dateKey|type|userName" -> { joined: boolean, timestamp: number }
-  const recentLocalChanges = {};
-  let isSaving = false;
-  let saveQueued = false;
-  let saveTimer = null;
-
-  function checkUrlHashConfig() {
-    if (location.hash && location.hash.includes('gist=')) {
-      const params = new URLSearchParams(location.hash.substring(1));
-      const g = params.get('gist');
-      const k = params.get('key');
-      if (g && k) {
-        gistId = g;
-        ghToken = atob(k);
-        localStorage.setItem('bg_gist_id', gistId);
-        localStorage.setItem('bg_gh_token', ghToken);
-        history.replaceState(null, null, location.pathname);
-        showToast('동아리 달력 연동이 자동으로 완료되었습니다!');
-      }
-    }
-  }
-
-  function ensureDbStructure(targetDb = dbData) {
-    if (!Array.isArray(targetDb.members)) targetDb.members = [];
-    if (!targetDb.emails || typeof targetDb.emails !== 'object') targetDb.emails = {};
-    if (!targetDb.schedule || typeof targetDb.schedule !== 'object') targetDb.schedule = {};
-  }
-
-  // 최근 60초 이내에 사용자가 직접 클릭한 출석 내역을 서버 데이터 위에 덮어씌워 증발 방지
-  function applyLocalProtection(targetDb) {
-    ensureDbStructure(targetDb);
-    const now = Date.now();
-    Object.keys(recentLocalChanges).forEach(key => {
-      const record = recentLocalChanges[key];
-      if (now - record.timestamp > 60000) {
-        delete recentLocalChanges[key];
-        return;
-      }
-      const [dateKey, type, userName] = key.split('|');
-      if (!targetDb.schedule[dateKey]) {
-        targetDb.schedule[dateKey] = { lunch: [], dinner: [] };
-      }
-      if (!Array.isArray(targetDb.schedule[dateKey][type])) {
-        targetDb.schedule[dateKey][type] = [];
-      }
-      const arr = targetDb.schedule[dateKey][type];
-      const idx = arr.indexOf(userName);
-      if (record.joined && idx === -1) {
-        arr.push(userName);
-      } else if (!record.joined && idx !== -1) {
-        arr.splice(idx, 1);
-      }
-    });
-  }
-
-  async function init() {
-    checkUrlHashConfig();
-    if (gistId && ghToken) {
-      await syncFromServer();
-    } else {
-      const savedLocal = localStorage.getItem('bg_demo_data');
-      if (savedLocal) dbData = JSON.parse(savedLocal);
-    }
-    ensureDbStructure();
-    renderUserSelect();
-    renderCalendar();
-  }
-
-  function showToast(msg, ms = 2000) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.display = 'block';
-    clearTimeout(window._toastTimer);
-    window._toastTimer = setTimeout(() => { t.style.display = 'none'; }, ms);
-  }
-
-  function renderUserSelect() {
-    const sel = document.getElementById('userSelect');
-    sel.innerHTML = '<option value="">-- 본인 이름 선택 --</option>';
-    if (currentUser && !dbData.members.includes(currentUser)) {
-      currentUser = '';
-      localStorage.removeItem('bg_user');
-    }
-    dbData.members.slice().sort().forEach(name => {
-      const opt = document.createElement('option');
-      opt.value = name;
-      const hasMail = dbData.emails[name] ? ' 🔔' : '';
-      opt.textContent = name + hasMail;
-      if (name === currentUser) opt.selected = true;
-      sel.appendChild(opt);
-    });
-    updateMyMailButtonUI();
-  }
-
-  function updateMyMailButtonUI() {
-    const btn = document.getElementById('myMailBtn');
-    if (!currentUser) {
-      btn.textContent = '🔔 내 메일 알림';
-      btn.className = 'btn';
-      return;
-    }
-    const myMail = dbData.emails[currentUser];
-    if (myMail) {
-      btn.textContent = `🔔 알림켜짐 (${myMail})`;
-      btn.className = 'btn btn-mail-on';
-    } else {
-      btn.textContent = '🔕 내 메일 등록하기';
-      btn.className = 'btn';
-    }
-  }
-
-  function changeUser(val) {
-    currentUser = val;
-    localStorage.setItem('bg_user', val);
-    updateMyMailButtonUI();
-    renderCalendar();
-  }
-
-  async function setMyEmailPrompt() {
-    if (!currentUser) {
-      alert('먼저 왼쪽에서 [👤 내 이름]을 선택해 주세요!');
-      return;
-    }
-    await editMemberEmail(currentUser);
-  }
-
-  async function editMemberEmail(memberName) {
-    const prevMail = dbData.emails[memberName] || '';
-    const input = prompt(
-      `[${memberName}] 님의 아침 9시 당일 안내 메일을 받을 이메일 주소를 입력하세요.\n(등록 해제하려면 빈칸으로 두고 확인)`,
-      prevMail
-    );
-    if (input === null) return;
-    const cleanMail = input.trim();
-    if (cleanMail) {
-      dbData.emails[memberName] = cleanMail;
-      showToast(`${memberName} 님의 알림 메일이 등록되었습니다!`);
-    } else {
-      delete dbData.emails[memberName];
-      showToast(`${memberName} 님의 알림 메일이 해제되었습니다.`);
-    }
-    renderUserSelect();
-    if (document.getElementById('memberModal').classList.contains('active')) {
-      renderMemberModalList();
-    }
-    queueSaveToServer();
-  }
-
-  async function addNewMember() {
-    const name = prompt('등록할 동아리원 이름(또는 닉네임)을 입력하세요:');
-    if (!name || !name.trim()) return;
-
-    const clean = name.trim();
-    if (!dbData.members.includes(clean)) {
-      dbData.members.push(clean);
-    }
-    currentUser = clean;
-    localStorage.setItem('bg_user', clean);
-
-    const mail = prompt(`[${clean}] 님, 아침 9시 모임 안내 메일을 받으실 이메일 주소를 입력하세요 (건너뛰려면 취소):`);
-    if (mail && mail.trim()) {
-      dbData.emails[clean] = mail.trim();
-    }
-
-    renderUserSelect();
-    renderCalendar();
-    queueSaveToServer();
-  }
-
-  async function openMemberModal() {
-    renderMemberModalList();
-    document.getElementById('memberModal').classList.add('active');
-  }
-
-  function closeMemberModal() {
-    document.getElementById('memberModal').classList.remove('active');
-  }
-
-  function renderMemberModalList() {
-    const box = document.getElementById('memberListBox');
-    const sorted = dbData.members.slice().sort();
-    document.getElementById('memberCountLabel').textContent = sorted.length;
-
-    if (sorted.length === 0) {
-      box.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:24px 0;font-size:0.88rem;">등록된 동아리원이 없습니다.</div>';
-      return;
-    }
-
-    box.innerHTML = '';
-    sorted.forEach(name => {
-      const row = document.createElement('div');
-      row.className = 'member-item';
-
-      const
+    .slot-badges { display: flex; gap: 4px; align-items: center;
