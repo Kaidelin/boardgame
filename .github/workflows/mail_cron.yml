@@ -2,8 +2,8 @@ name: Send Daily Boardgame Reminder
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 매일 아침 9시 (KST)
-  workflow_dispatch:
+    - cron: '0 0 * * *' # UTC 00:00 = 한국 시간(KST) 매일 아침 09:00
+  workflow_dispatch:   # 수동 실행 버튼 활성화
 
 jobs:
   send-mail:
@@ -17,17 +17,13 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install nodemailer
-
-      - name: Run mail sender script
+      - name: Run script
         env:
           GIST_ID: ${{ secrets.GIST_ID }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          GH_USER: 'Kaidelin' # 👈 본인 아이디로 수정
-          GH_REPO: 'boardgame'        # 👈 저장소 이름으로 수정
+          EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
+          EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
+          EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
+          GH_USER: 'Kaidelin' # 👈 수정
+          GH_REPO: 'boardgame'        # 👈 수정
         run: node check_mail.js
