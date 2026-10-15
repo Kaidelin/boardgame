@@ -261,7 +261,6 @@
 
 <script>
   const GOAL_COUNT = 4;
-  // 폭탄해체반 기본 동아리원 명단 (자동 유지)
   const DEFAULT_MEMBERS = ['김성욱', '김지원', '류종혁', '성인제', '안슬기', '이하림', '차승휘'];
 
   let currentYear = new Date().getFullYear();
@@ -276,7 +275,12 @@
     schedule: {}
   };
 
-  const recentLocalChanges = {};
+  // [핵심 개선] 출석뿐만 아니라 이메일, 명단 변경 이력을 모두 5분간 개별 추적하여 구버전 덮어쓰기 원천 차단
+  const PROTECTION_TTL = 300000; // 5분 (300,000ms)
+  const recentScheduleChanges = {}; // "dateKey|type|userName" -> { joined: bool, ts: number }
+  const recentEmailChanges = {};    // "userName" -> { email: string|null, ts: number }
+  const recentMemberChanges = {};   // "userName" -> { action: 'add'|'del', ts: number }
+
   let isSaving = false;
   let saveQueued = false;
   let saveTimer = null;
@@ -306,30 +310,71 @@
     if (!targetDb.schedule || typeof targetDb.schedule !== 'object') targetDb.schedule = {};
   }
 
-  function applyLocalProtection(targetDb) {
-    ensureDbStructure(targetDb);
+  // 서버 최신 데이터(serverDb)와 현재 브라우저의 변경사항을 비파괴 방식으로 스마트 병합
+  function mergeWithServerDb(serverDb) {
+    ensureDbStructure(serverDb);
+    ensureDbStructure(dbData);
     const now = Date.now();
-    Object.keys(recentLocalChanges).forEach(key => {
-      const record = recentLocalChanges[key];
-      if (now - record.timestamp > 60000) {
-        delete recentLocalChanges[key];
+
+    // 1. 명단(members) 병합: 서버 명단 + 기본 명단 합집합 후 최근 조작 반영
+    const memberSet = new Set([...DEFAULT_MEMBERS, ...serverDb.members, ...dbData.members]);
+    Object.keys(recentMemberChanges).forEach(name => {
+      const rec = recentMemberChanges[name];
+      if (now - rec.ts > PROTECTION_TTL) {
+        delete recentMemberChanges[name];
+        return;
+      }
+      if (rec.action === 'add') memberSet.add(name);
+      if (rec.action === 'del') memberSet.delete(name);
+    });
+    const mergedMembers = Array.from(memberSet);
+
+    // 2. 이메일(emails) 비파괴 병합:
+    // 로컬이나 서버 중 한 곳이라도 이메일이 있으면 무조건 살리고(구버전 빈값 덮어쓰기 방지),
+    // 최근 직접 수정/삭제한 이메일 내역만 최우선 반영
+    const mergedEmails = { ...dbData.emails, ...serverDb.emails };
+    Object.keys(recentEmailChanges).forEach(name => {
+      const rec = recentEmailChanges[name];
+      if (now - rec.ts > PROTECTION_TTL) {
+        delete recentEmailChanges[name];
+        return;
+      }
+      if (rec.email) {
+        mergedEmails[name] = rec.email;
+      } else {
+        delete mergedEmails[name];
+      }
+    });
+
+    // 3. 일정(schedule) 병합: 서버 최신 일정을 기본으로 삼고, 이 브라우저에서 최근 클릭한 출석만 덧씌움
+    const mergedSchedule = JSON.parse(JSON.stringify(serverDb.schedule));
+    Object.keys(recentScheduleChanges).forEach(key => {
+      const rec = recentScheduleChanges[key];
+      if (now - rec.ts > PROTECTION_TTL) {
+        delete recentScheduleChanges[key];
         return;
       }
       const [dateKey, type, userName] = key.split('|');
-      if (!targetDb.schedule[dateKey]) {
-        targetDb.schedule[dateKey] = { lunch: [], dinner: [] };
+      if (!mergedSchedule[dateKey]) {
+        mergedSchedule[dateKey] = { lunch: [], dinner: [] };
       }
-      if (!Array.isArray(targetDb.schedule[dateKey][type])) {
-        targetDb.schedule[dateKey][type] = [];
+      if (!Array.isArray(mergedSchedule[dateKey][type])) {
+        mergedSchedule[dateKey][type] = [];
       }
-      const arr = targetDb.schedule[dateKey][type];
+      const arr = mergedSchedule[dateKey][type];
       const idx = arr.indexOf(userName);
-      if (record.joined && idx === -1) {
+      if (rec.joined && idx === -1) {
         arr.push(userName);
-      } else if (!record.joined && idx !== -1) {
+      } else if (!rec.joined && idx !== -1) {
         arr.splice(idx, 1);
       }
     });
+
+    return {
+      members: mergedMembers,
+      emails: mergedEmails,
+      schedule: mergedSchedule
+    };
   }
 
   async function init() {
@@ -339,13 +384,19 @@
       try { dbData = JSON.parse(savedLocal); } catch (e) {}
     }
     ensureDbStructure();
-    // 서버 통신을 기다리지 않고 즉시 달력부터 화면에 렌더링
     renderUserSelect();
     renderCalendar();
 
     if (gistId && ghToken) {
       await syncFromServer(true);
     }
+
+    // 다른 업무를 보다가 달력 창을 다시 클릭하면 자동으로 최신 데이터 동기화
+    window.addEventListener('focus', () => {
+      if (gistId && ghToken && !isSaving) {
+        syncFromServer(true);
+      }
+    });
   }
 
   function showToast(msg, ms = 2000) {
@@ -416,9 +467,11 @@
     const cleanMail = input.trim();
     if (cleanMail) {
       dbData.emails[memberName] = cleanMail;
+      recentEmailChanges[memberName] = { email: cleanMail, ts: Date.now() };
       showToast(`${memberName} 님의 알림 메일이 등록되었습니다!`);
     } else {
       delete dbData.emails[memberName];
+      recentEmailChanges[memberName] = { email: null, ts: Date.now() };
       showToast(`${memberName} 님의 알림 메일이 해제되었습니다.`);
     }
     renderUserSelect();
@@ -436,12 +489,15 @@
     if (!dbData.members.includes(clean)) {
       dbData.members.push(clean);
     }
+    recentMemberChanges[clean] = { action: 'add', ts: Date.now() };
     currentUser = clean;
     localStorage.setItem('bg_user', clean);
 
     const mail = prompt(`[${clean}] 님, 아침 9시 모임 안내 메일을 받으실 이메일 주소를 입력하세요 (건너뛰려면 취소):`);
     if (mail && mail.trim()) {
-      dbData.emails[clean] = mail.trim();
+      const cleanMail = mail.trim();
+      dbData.emails[clean] = cleanMail;
+      recentEmailChanges[clean] = { email: cleanMail, ts: Date.now() };
     }
 
     renderUserSelect();
@@ -449,7 +505,11 @@
     queueSaveToServer();
   }
 
-  function openMemberModal() {
+  async function openMemberModal() {
+    // 명단 관리창을 열 때 서버 최신 이메일/명단 상태를 먼저 한번 동기화
+    if (gistId && ghToken && !isSaving) {
+      await syncFromServer(true);
+    }
     renderMemberModalList();
     document.getElementById('memberModal').classList.add('active');
   }
@@ -524,11 +584,13 @@
 
     const names = raw.split(/[,，\n\t]+/).map(s => s.trim()).filter(Boolean);
     let addedCount = 0;
+    const now = Date.now();
     names.forEach(n => {
       if (!dbData.members.includes(n)) {
         dbData.members.push(n);
         addedCount++;
       }
+      recentMemberChanges[n] = { action: 'add', ts: now };
     });
 
     input.value = '';
@@ -543,16 +605,21 @@
     const newName = prompt(`[${oldName}] 님의 새로운 이름을 입력하세요:`, oldName);
     if (!newName || !newName.trim() || newName.trim() === oldName) return;
     const cleanNew = newName.trim();
+    const now = Date.now();
 
     const idx = dbData.members.indexOf(oldName);
     if (idx !== -1) {
       if (dbData.members.includes(cleanNew)) dbData.members.splice(idx, 1);
       else dbData.members[idx] = cleanNew;
     }
+    recentMemberChanges[oldName] = { action: 'del', ts: now };
+    recentMemberChanges[cleanNew] = { action: 'add', ts: now };
 
     if (dbData.emails[oldName]) {
       dbData.emails[cleanNew] = dbData.emails[oldName];
+      recentEmailChanges[cleanNew] = { email: dbData.emails[oldName], ts: now };
       delete dbData.emails[oldName];
+      recentEmailChanges[oldName] = { email: null, ts: now };
     }
 
     Object.keys(dbData.schedule).forEach(dateKey => {
@@ -563,6 +630,8 @@
           if (sIdx !== -1) {
             if (arr.includes(cleanNew)) arr.splice(sIdx, 1);
             else arr[sIdx] = cleanNew;
+            recentScheduleChanges[`${dateKey}|${slot}|${oldName}`] = { joined: false, ts: now };
+            recentScheduleChanges[`${dateKey}|${slot}|${cleanNew}`] = { joined: true, ts: now };
           }
         }
       });
@@ -581,14 +650,19 @@
 
   function deleteMember(targetName) {
     if (!confirm(`[${targetName}] 님을 삭제하시겠습니까?`)) return;
+    const now = Date.now();
 
     dbData.members = dbData.members.filter(n => n !== targetName);
+    recentMemberChanges[targetName] = { action: 'del', ts: now };
+
     delete dbData.emails[targetName];
+    recentEmailChanges[targetName] = { email: null, ts: now };
 
     Object.keys(dbData.schedule).forEach(dateKey => {
       ['lunch', 'dinner'].forEach(slot => {
-        if (Array.isArray(dbData.schedule[dateKey][slot])) {
+        if (Array.isArray(dbData.schedule[dateKey][slot]) && dbData.schedule[dateKey][slot].includes(targetName)) {
           dbData.schedule[dateKey][slot] = dbData.schedule[dateKey][slot].filter(n => n !== targetName);
+          recentScheduleChanges[`${dateKey}|${slot}|${targetName}`] = { joined: false, ts: now };
         }
       });
     });
@@ -746,9 +820,9 @@
       isJoined = false;
     }
 
-    recentLocalChanges[`${dateKey}|${type}|${currentUser}`] = {
+    recentScheduleChanges[`${dateKey}|${type}|${currentUser}`] = {
       joined: isJoined,
-      timestamp: Date.now()
+      ts: Date.now()
     };
 
     renderCalendar();
@@ -763,21 +837,35 @@
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       processSaveQueue();
-    }, 250);
+    }, 300);
   }
 
+  // [핵심 개선] 저장하기 직전에 서버 최신본을 먼저 불러와 내 변경분만 안전하게 병합(Merge) 후 저장
   async function processSaveQueue() {
     if (isSaving) {
       saveQueued = true;
       return;
     }
     isSaving = true;
-    showToast('실시간 저장 중...');
+    showToast('실시간 병합 및 저장 중...');
 
     try {
-      applyLocalProtection(dbData);
+      // 1단계: 서버의 현재 최신 데이터 가져오기
+      const getRes = await fetch(`https://api.github.com/gists/${gistId}?t=${Date.now()}`, {
+        headers: { 'Authorization': `Bearer ${ghToken}` },
+        cache: 'no-store'
+      });
 
-      const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+      if (getRes.ok) {
+        const gistData = await getRes.json();
+        if (gistData.files && gistData.files['boardgame_calendar.json']) {
+          const serverDb = JSON.parse(gistData.files['boardgame_calendar.json'].content);
+          dbData = mergeWithServerDb(serverDb);
+        }
+      }
+
+      // 2단계: 병합된 최신 데이터를 서버에 저장
+      const patchRes = await fetch(`https://api.github.com/gists/${gistId}`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${ghToken}`,
@@ -792,7 +880,14 @@
         })
       });
 
-      if (!res.ok) throw new Error('저장 실패');
+      if (!patchRes.ok) throw new Error('저장 실패');
+
+      localStorage.setItem('bg_demo_data', JSON.stringify(dbData));
+      renderUserSelect();
+      renderCalendar();
+      if (document.getElementById('memberModal').classList.contains('active')) {
+        renderMemberModalList();
+      }
       showToast('저장 완료!');
     } catch (e) {
       console.error(e);
@@ -811,7 +906,9 @@
     if (isSaving) return;
 
     if (clearProtection) {
-      Object.keys(recentLocalChanges).forEach(k => delete recentLocalChanges[k]);
+      Object.keys(recentScheduleChanges).forEach(k => delete recentScheduleChanges[k]);
+      Object.keys(recentEmailChanges).forEach(k => delete recentEmailChanges[k]);
+      Object.keys(recentMemberChanges).forEach(k => delete recentMemberChanges[k]);
     }
 
     if (!silent) showToast('실시간 일정 불러오는 중...');
@@ -824,11 +921,13 @@
       const data = await res.json();
       if (data.files && data.files['boardgame_calendar.json']) {
         const serverDb = JSON.parse(data.files['boardgame_calendar.json'].content);
-        applyLocalProtection(serverDb);
-        dbData = serverDb;
+        dbData = mergeWithServerDb(serverDb);
         localStorage.setItem('bg_demo_data', JSON.stringify(dbData));
         renderUserSelect();
         renderCalendar();
+        if (document.getElementById('memberModal').classList.contains('active')) {
+          renderMemberModalList();
+        }
         if (!silent) showToast('최신 일정 반영 완료!');
       }
     } catch (e) {
