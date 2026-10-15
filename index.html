@@ -5,169 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎲 폭탄해체반 월간 캘린더</title>
   <style>
-    :root {
-      --bg: #f4f6f9;
-      --card: #ffffff;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --sub: #64748b;
-      --my-border: #2563eb;
-      --my-bg: #eff6ff;
-      --ready-bg: #dcfce7;
-      --ready-border: #16a34a;
-      --ready-text: #15803d;
-    }
-    * { box-sizing: border-box; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { margin: 0; padding: 16px; background: var(--bg); color: var(--text); }
-    .container { max-width: 1280px; margin: 0 auto; }
-
-    .header {
-      background: var(--card); padding: 16px 20px; border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 14px;
-      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
-    }
-    .title-area { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .title-area h1 { margin: 0; font-size: 1.25rem; }
-    .badge-stat {
-      font-size: 0.85rem; padding: 5px 10px; border-radius: 20px; font-weight: 600;
-      background: #f1f5f9; color: #334155;
-    }
-    .badge-stat.green { background: var(--ready-bg); color: var(--ready-text); }
-    .badge-stat.blue { background: var(--my-bg); color: var(--my-border); }
-
-    .toolbar {
-      background: var(--card); padding: 12px 20px; border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 14px;
-      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
-    }
-    .user-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .user-box select, .user-box input, .btn {
-      padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; background: #fff;
-    }
-    .btn { cursor: pointer; font-weight: 600; transition: 0.15s; }
-    .btn:hover { background: #f1f5f9; }
-    .btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
-    .btn-primary:hover { background: #1d4ed8; }
-    .btn-mail-on { background: #fef3c7; color: #b45309; border-color: #fde68a; }
-    .btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
-    .btn-danger:hover { background: #fecaca; }
-    .month-nav { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; font-weight: 700; }
-
-    .legend {
-      display: flex; gap: 12px; font-size: 0.82rem; color: var(--sub); align-items: center; flex-wrap: wrap;
-    }
-    .legend span { display: inline-flex; align-items: center; gap: 5px; }
-    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
-
-    .calendar-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
-    }
-    .calendar-grid.weekdays-only {
-      grid-template-columns: repeat(5, 1fr);
-    }
-    .day-header {
-      text-align: center; font-weight: 700; font-size: 0.85rem; padding: 8px 0;
-      background: #e2e8f0; border-radius: 8px; color: #334155;
-    }
-    .day-header.sun { color: #dc2626; }
-    .day-header.sat { color: #2563eb; }
-
-    .day-cell {
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 8px; min-height: 155px; display: flex; flex-direction: column; gap: 6px;
-    }
-    .day-cell.empty { background: transparent; border: none; min-height: auto; }
-    .day-cell.today { border: 2px solid #0f172a; }
-    .date-num {
-      font-weight: 700; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;
-      padding-bottom: 2px;
-    }
-    .today-tag {
-      background: #0f172a; color: #fff; font-size: 0.7rem; padding: 1px 6px; border-radius: 4px;
-    }
-
-    .slot {
-      border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 8px;
-      cursor: pointer; transition: all 0.12s ease; background: #f8fafc;
-      display: flex; flex-direction: column; gap: 5px; flex: 1;
-      user-select: none;
-    }
-    .slot:hover { border-color: #94a3b8; transform: translateY(-1px); }
-    .slot.confirmed { background: var(--ready-bg); border-color: var(--ready-border); }
-    .slot.my-joined {
-      border: 2.5px solid var(--my-border);
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-    }
-    .slot.my-joined:not(.confirmed) { background: var(--my-bg); }
-
-    .slot-top {
-      display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 700;
-    }
-    .slot-badges { display: flex; gap: 4px; align-items: center; }
-    .count-badge {
-      font-size: 0.72rem; padding: 1px 6px; border-radius: 10px; background: #e2e8f0; color: #334155;
-    }
-    .slot.confirmed .count-badge { background: #16a34a; color: #fff; }
-    .my-badge {
-      font-size: 0.68rem; padding: 1px 5px; border-radius: 4px; background: #2563eb; color: #fff;
-    }
-
-    .names-list {
-      display: flex; flex-wrap: wrap; gap: 3px; font-size: 0.74rem; color: #475569; min-height: 18px;
-    }
-    .name-chip {
-      background: rgba(255,255,255,0.85); border: 1px solid #cbd5e1;
-      padding: 1px 5px; border-radius: 4px;
-    }
-    .name-chip.me {
-      background: #2563eb; color: #fff; border-color: #2563eb; font-weight: 700;
-    }
-
-    .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(15,23,42,0.6);
-      display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px;
-    }
-    .modal-backdrop.active { display: flex; }
-    .modal {
-      background: #fff; max-width: 580px; width: 100%; border-radius: 14px; padding: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto;
-    }
-    .modal h2 { margin-top: 0; font-size: 1.15rem; }
-    .modal p { font-size: 0.85rem; color: #475569; line-height: 1.5; margin: 6px 0 12px; }
-    .modal input[type="text"], .modal input[type="password"], .modal input[type="email"] {
-      width: 100%; padding: 9px 12px; margin: 4px 0 12px; border: 1px solid #cbd5e1; border-radius: 8px;
-    }
-    .share-box {
-      background: #f1f5f9; padding: 10px; border-radius: 8px; font-size: 0.8rem;
-      word-break: break-all; margin-top: 10px; border: 1px dashed #94a3b8;
-    }
-
-    .member-add-row { display: flex; gap: 8px; margin-bottom: 14px; }
-    .member-add-row input { flex: 1; margin: 0 !important; }
-    .member-list-box {
-      border: 1px solid #e2e8f0; border-radius: 10px; max-height: 300px; overflow-y: auto;
-      padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px;
-    }
-    .member-item {
-      display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
-      background: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0;
-    }
-    .member-info { display: flex; flex-direction: column; gap: 2px; }
-    .member-item-name { font-weight: 600; font-size: 0.92rem; }
-    .member-item-email { font-size: 0.76rem; color: #64748b; }
-    .member-item-actions { display: flex; gap: 5px; flex-wrap: wrap; }
-    .btn-sm { padding: 4px 8px; font-size: 0.76rem; border-radius: 6px; }
-
-    .status-toast {
-      position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff;
-      padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; display: none; z-index: 200;
-    }
-
-    @media (max-width: 900px) {
-      .calendar-grid, .calendar-grid.weekdays-only { grid-template-columns: repeat(2, 1fr); }
-      .day-header { display: none; }
-      .day-cell.empty { display: none; }
-    }
+    :root { --bg:#f4f6f9; --card:#fff; --border:#e2e8f0; --text:#1e293b; --sub:#64748b; --my-border:#2563eb; --my-bg:#eff6ff; --ready-bg:#dcfce7; --ready-border:#16a34a; --ready-text:#15803d; }
+    * { box-sizing:border-box; font-family:'Pretendard',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+    body { margin:0; padding:16px; background:var(--bg); color:var(--text); }
+    .container { max-width:1280px; margin:0 auto; }
+    .header, .toolbar { background:var(--card); padding:14px 20px; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:14px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; }
+    .title-area { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .title-area h1 { margin:0; font-size:1.25rem; }
+    .badge-stat { font-size:0.85rem; padding:5px 10px; border-radius:20px; font-weight:600; background:#f1f5f9; color:#334155; }
+    .badge-stat.green { background:var(--ready-bg); color:var(--ready-text); }
+    .badge-stat.blue { background:var(--my-bg); color:var(--my-border); }
+    .user-box { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .user-box select, .user-box input, .btn { padding:7px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.88rem; background:#fff; }
+    .btn { cursor:pointer; font-weight:600; transition:0.15s; }
+    .btn:hover { background:#f1f5f9; }
+    .btn-primary { background:#2563eb; color:#fff; border-color:#2563eb; }
+    .btn-primary:hover { background:#1d4ed8; }
+    .btn-mail-on { background:#fef3c7; color:#b45309; border-color:#fde68a; }
+    .btn-danger { background:#fee2e2; color:#b91c1c; border-color:#fecaca; }
+    .month-nav { display:flex; align-items:center; gap:10px; font-size:1.15rem; font-weight:700; }
+    .legend { display:flex; gap:12px; font-size:0.82rem; color:var(--sub); align-items:center; flex-wrap:wrap; }
+    .legend span { display:inline-flex; align-items:center; gap:5px; }
+    .dot { width:12px; height:12px; border-radius:3px; display:inline-block; }
+    .calendar-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; }
+    .calendar-grid.weekdays-only { grid-template-columns:repeat(5, 1fr); }
+    .day-header { text-align:center; font-weight:700; font-size:0.85rem; padding:8px 0; background:#e2e8f0; border-radius:8px; color:#334155; }
+    .day-header.sun { color:#dc2626; }
+    .day-header.sat { color:#2563eb; }
+    .day-cell { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px; min-height:155px; display:flex; flex-direction:column; gap:6px; }
+    .day-cell.empty { background:transparent; border:none; min-height:auto; }
+    .day-cell.today { border:2px solid #0f172a; }
+    .date-num { font-weight:700; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center; padding-bottom:2px; }
+    .today-tag { background:#0f172a; color:#fff; font-size:0.7rem; padding:1px 6px; border-radius:4px; }
+    .slot { border:1.5px solid #e2e8f0; border-radius:8px; padding:7px 8px; cursor:pointer; transition:all 0.12s ease; background:#f8fafc; display:flex; flex-direction:column; gap:5px; flex:1; user-select:none; }
+    .slot:hover { border-color:#94a3b8; transform:translateY(-1px); }
+    .slot.confirmed { background:var(--ready-bg); border-color:var(--ready-border); }
+    .slot.my-joined { border:2.5px solid var(--my-border); box-shadow:0 0 0 2px rgba(37,99,235,0.15); }
+    .slot.my-joined:not(.confirmed) { background:var(--my-bg); }
+    .slot-top { display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; font-weight:700; }
+    .slot-badges { display:flex; gap:4px; align-items:center; }
+    .count-badge { font-size:0.72rem; padding:1px 6px; border-radius:10px; background:#e2e8f0; color:#334155; }
+    .slot.confirmed .count-badge { background:#16a34a; color:#fff; }
+    .my-badge { font-size:0.68rem; padding:1px 5px; border-radius:4px; background:#2563eb; color:#fff; }
+    .names-list { display:flex; flex-wrap:wrap; gap:3px; font-size:0.74rem; color:#475569; min-height:18px; }
+    .name-chip { background:rgba(255,255,255,0.85); border:1px solid #cbd5e1; padding:1px 5px; border-radius:4px; }
+    .name-chip.me { background:#2563eb; color:#fff; border-color:#2563eb; font-weight:700; }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(15,23,42,0.6); display:none; justify-content:center; align-items:center; z-index:100; padding:16px; }
+    .modal-backdrop.active { display:flex; }
+    .modal { background:#fff; max-width:580px; width:100%; border-radius:14px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,0.15); max-height:90vh; overflow-y:auto; }
+    .modal h2 { margin-top:0; font-size:1.15rem; }
+    .modal p { font-size:0.85rem; color:#475569; line-height:1.5; margin:6px 0 12px; }
+    .modal input[type="text"], .modal input[type="password"] { width:100%; padding:9px 12px; margin:4px 0 12px; border:1px solid #cbd5e1; border-radius:8px; }
+    .share-box { background:#f1f5f9; padding:10px; border-radius:8px; font-size:0.8rem; word-break:break-all; margin-top:10px; border:1px dashed #94a3b8; }
+    .member-add-row { display:flex; gap:8px; margin-bottom:14px; }
+    .member-add-row input { flex:1; margin:0 !important; }
+    .member-list-box { border:1px solid #e2e8f0; border-radius:10px; max-height:300px; overflow-y:auto; padding:8px; background:#f8fafc; display:flex; flex-direction:column; gap:6px; }
+    .member-item { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; background:#fff; padding:8px 12px; border-radius:8px; border:1px solid #e2e8f0; }
+    .member-info { display:flex; flex-direction:column; gap:2px; }
+    .member-item-name { font-weight:600; font-size:0.92rem; }
+    .member-item-email { font-size:0.76rem; color:#64748b; }
+    .member-item-actions { display:flex; gap:5px; flex-wrap:wrap; }
+    .btn-sm { padding:4px 8px; font-size:0.76rem; border-radius:6px; }
+    .status-toast { position:fixed; bottom:20px; right:20px; background:#0f172a; color:#fff; padding:12px 18px; border-radius:8px; font-size:0.85rem; display:none; z-index:200; max-width:420px; line-height:1.4; }
+    @media (max-width:900px) { .calendar-grid, .calendar-grid.weekdays-only { grid-template-columns:repeat(2, 1fr); } .day-header, .day-cell.empty { display:none; } }
   </style>
 </head>
 <body>
@@ -200,7 +100,6 @@
       <button class="btn" id="myMailBtn" onclick="setMyEmailPrompt()">🔔 내 메일 알림</button>
       <button class="btn btn-primary" onclick="openMemberModal()">👥 명단 관리</button>
     </div>
-
     <div class="month-nav">
       <button class="btn" onclick="moveMonth(-1)">◀ 이전 달</button>
       <span id="monthLabel">2026년 10월</span>
@@ -212,13 +111,10 @@
   <div id="calendarGrid" class="calendar-grid"></div>
 </div>
 
-<!-- [모달 1] 동아리원 명단 & 이메일 관리 -->
 <div class="modal-backdrop" id="memberModal">
   <div class="modal">
     <h2>👥 동아리원 명단 및 이메일 관리 (<span id="memberCountLabel">0</span>명)</h2>
-    <p>
-      동아리원 이름을 추가하거나 각자의 <b>알림 수신용 이메일</b>을 등록할 수 있습니다. 이메일을 등록해 두면 아침 9시 당일 안내 메일이 해당 주소로 발송됩니다.
-    </p>
+    <p>동아리원 이름을 추가하거나 각자의 <b>알림 수신용 이메일</b>을 등록할 수 있습니다.</p>
     <div class="member-add-row">
       <input type="text" id="bulkMemberInput" placeholder="예: 홍길동, 김철수 (쉼표로 구분)" onkeydown="if(event.key==='Enter') addBulkMembers()">
       <button class="btn btn-primary" onclick="addBulkMembers()">+ 명단 추가</button>
@@ -230,24 +126,23 @@
   </div>
 </div>
 
-<!-- [모달 2] 초기 설정 모달 -->
 <div class="modal-backdrop" id="setupModal">
   <div class="modal">
-    <h2>⚙️ GitHub 저장소 설정 (총무 전용)</h2>
-    <p>
-      GitHub Settings &gt; Developer settings &gt; Personal access tokens (classic)에서 <code>gist</code> 권한 체크 후 발급받은 토큰을 입력하세요.
-    </p>
+    <h2>⚙️ GitHub 저장소 설정 및 오류 진단</h2>
+    <p>GitHub Token 발급 시 반드시 <b><code>gist</code> 권한에 체크</b>되어 있어야 저장이 작동합니다.</p>
     <label style="font-size:0.82rem;font-weight:700;">GitHub Token (ghp_...)</label>
     <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
 
-    <label style="font-size:0.82rem;font-weight:700;">Gist ID (자동 생성 시 비워두세요)</label>
-    <input type="text" id="gistInput" placeholder="새로 만들려면 비워두고 [새 동아리 DB 자동 생성] 클릭">
+    <label style="font-size:0.82rem;font-weight:700;">Gist ID</label>
+    <input type="text" id="gistInput" placeholder="Gist 주소 맨 뒤의 영문+숫자 코드">
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-      <button class="btn btn-primary" onclick="createNewGistDB()">✨ 새 동아리 DB 자동 생성</button>
-      <button class="btn" onclick="saveManualConfig()">저장소 설정 저장</button>
+      <button class="btn btn-primary" onclick="saveManualConfig()">💾 설정 저장 및 연결 테스트</button>
+      <button class="btn" onclick="createNewGistDB()">✨ 새 DB 생성</button>
       <button class="btn" onclick="closeSetupModal()" style="margin-left:auto;">닫기</button>
     </div>
+
+    <div id="diagBox" style="display:none;margin-top:12px;padding:10px;border-radius:8px;font-size:0.83rem;line-height:1.5;"></div>
 
     <div id="shareUrlBox" style="display:none;margin-top:14px;">
       <strong style="font-size:0.84rem;color:#15803d;">✅ 플로우(Flow) 공지용 전용 링크:</strong>
@@ -263,23 +158,33 @@
   const GOAL_COUNT = 4;
   const DEFAULT_MEMBERS = ['김성욱', '김지원', '류종혁', '성인제', '안슬기', '이하림', '차승휘'];
 
+  // [선택사항] 여기에 이메일을 직접 적어두시면 절대 지워지지 않고 기본값으로 고정됩니다.
+  const DEFAULT_EMAILS = {
+    '차승휘': 'chash@krx.co.kr'
+    // '이하림': 'example@krx.co.kr',
+    // '안슬기': 'example2@krx.co.kr',
+  };
+
+  function cleanStr(val) {
+    return (val || '').replace(/[^a-zA-Z0-9_-]/g, '');
+  }
+
   let currentYear = new Date().getFullYear();
   let currentMonth = new Date().getMonth();
   let currentUser = localStorage.getItem('bg_user') || '';
-  let gistId = localStorage.getItem('bg_gist_id') || '';
-  let ghToken = localStorage.getItem('bg_gh_token') || '';
+  let gistId = cleanStr(localStorage.getItem('bg_gist_id'));
+  let ghToken = cleanStr(localStorage.getItem('bg_gh_token'));
 
   let dbData = {
     members: [...DEFAULT_MEMBERS],
-    emails: {},
+    emails: { ...DEFAULT_EMAILS },
     schedule: {}
   };
 
-  // [핵심 개선] 출석뿐만 아니라 이메일, 명단 변경 이력을 모두 5분간 개별 추적하여 구버전 덮어쓰기 원천 차단
-  const PROTECTION_TTL = 300000; // 5분 (300,000ms)
-  const recentScheduleChanges = {}; // "dateKey|type|userName" -> { joined: bool, ts: number }
-  const recentEmailChanges = {};    // "userName" -> { email: string|null, ts: number }
-  const recentMemberChanges = {};   // "userName" -> { action: 'add'|'del', ts: number }
+  const PROTECTION_TTL = 300000;
+  const recentScheduleChanges = {};
+  const recentEmailChanges = {};
+  const recentMemberChanges = {};
 
   let isSaving = false;
   let saveQueued = false;
@@ -288,93 +193,67 @@
   function checkUrlHashConfig() {
     if (location.hash && location.hash.includes('gist=')) {
       const params = new URLSearchParams(location.hash.substring(1));
-      const g = params.get('gist');
+      const g = cleanStr(params.get('gist'));
       const k = params.get('key');
       if (g && k) {
-        gistId = g;
-        ghToken = atob(k);
-        localStorage.setItem('bg_gist_id', gistId);
-        localStorage.setItem('bg_gh_token', ghToken);
-        history.replaceState(null, null, location.pathname);
-        showToast('동아리 달력 연동이 자동으로 완료되었습니다!');
+        try {
+          gistId = g;
+          ghToken = cleanStr(atob(k));
+          localStorage.setItem('bg_gist_id', gistId);
+          localStorage.setItem('bg_gh_token', ghToken);
+          history.replaceState(null, null, location.pathname);
+          showToast('동아리 달력 연동이 완료되었습니다!');
+        } catch (e) {}
       }
     }
   }
 
   function ensureDbStructure(targetDb = dbData) {
-    if (!Array.isArray(targetDb.members)) targetDb.members = [];
-    if (targetDb.members.length === 0) {
+    if (!Array.isArray(targetDb.members) || targetDb.members.length === 0) {
       targetDb.members = [...DEFAULT_MEMBERS];
     }
     if (!targetDb.emails || typeof targetDb.emails !== 'object') targetDb.emails = {};
+    Object.keys(DEFAULT_EMAILS).forEach(k => {
+      if (!targetDb.emails[k]) targetDb.emails[k] = DEFAULT_EMAILS[k];
+    });
     if (!targetDb.schedule || typeof targetDb.schedule !== 'object') targetDb.schedule = {};
   }
 
-  // 서버 최신 데이터(serverDb)와 현재 브라우저의 변경사항을 비파괴 방식으로 스마트 병합
   function mergeWithServerDb(serverDb) {
     ensureDbStructure(serverDb);
     ensureDbStructure(dbData);
     const now = Date.now();
 
-    // 1. 명단(members) 병합: 서버 명단 + 기본 명단 합집합 후 최근 조작 반영
     const memberSet = new Set([...DEFAULT_MEMBERS, ...serverDb.members, ...dbData.members]);
     Object.keys(recentMemberChanges).forEach(name => {
       const rec = recentMemberChanges[name];
-      if (now - rec.ts > PROTECTION_TTL) {
-        delete recentMemberChanges[name];
-        return;
-      }
+      if (now - rec.ts > PROTECTION_TTL) { delete recentMemberChanges[name]; return; }
       if (rec.action === 'add') memberSet.add(name);
       if (rec.action === 'del') memberSet.delete(name);
     });
-    const mergedMembers = Array.from(memberSet);
 
-    // 2. 이메일(emails) 비파괴 병합:
-    // 로컬이나 서버 중 한 곳이라도 이메일이 있으면 무조건 살리고(구버전 빈값 덮어쓰기 방지),
-    // 최근 직접 수정/삭제한 이메일 내역만 최우선 반영
-    const mergedEmails = { ...dbData.emails, ...serverDb.emails };
+    const mergedEmails = { ...DEFAULT_EMAILS, ...dbData.emails, ...serverDb.emails };
     Object.keys(recentEmailChanges).forEach(name => {
       const rec = recentEmailChanges[name];
-      if (now - rec.ts > PROTECTION_TTL) {
-        delete recentEmailChanges[name];
-        return;
-      }
-      if (rec.email) {
-        mergedEmails[name] = rec.email;
-      } else {
-        delete mergedEmails[name];
-      }
+      if (now - rec.ts > PROTECTION_TTL) { delete recentEmailChanges[name]; return; }
+      if (rec.email) mergedEmails[name] = rec.email;
+      else delete mergedEmails[name];
     });
 
-    // 3. 일정(schedule) 병합: 서버 최신 일정을 기본으로 삼고, 이 브라우저에서 최근 클릭한 출석만 덧씌움
     const mergedSchedule = JSON.parse(JSON.stringify(serverDb.schedule));
     Object.keys(recentScheduleChanges).forEach(key => {
       const rec = recentScheduleChanges[key];
-      if (now - rec.ts > PROTECTION_TTL) {
-        delete recentScheduleChanges[key];
-        return;
-      }
+      if (now - rec.ts > PROTECTION_TTL) { delete recentScheduleChanges[key]; return; }
       const [dateKey, type, userName] = key.split('|');
-      if (!mergedSchedule[dateKey]) {
-        mergedSchedule[dateKey] = { lunch: [], dinner: [] };
-      }
-      if (!Array.isArray(mergedSchedule[dateKey][type])) {
-        mergedSchedule[dateKey][type] = [];
-      }
+      if (!mergedSchedule[dateKey]) mergedSchedule[dateKey] = { lunch: [], dinner: [] };
+      if (!Array.isArray(mergedSchedule[dateKey][type])) mergedSchedule[dateKey][type] = [];
       const arr = mergedSchedule[dateKey][type];
       const idx = arr.indexOf(userName);
-      if (rec.joined && idx === -1) {
-        arr.push(userName);
-      } else if (!rec.joined && idx !== -1) {
-        arr.splice(idx, 1);
-      }
+      if (rec.joined && idx === -1) arr.push(userName);
+      else if (!rec.joined && idx !== -1) arr.splice(idx, 1);
     });
 
-    return {
-      members: mergedMembers,
-      emails: mergedEmails,
-      schedule: mergedSchedule
-    };
+    return { members: Array.from(memberSet), emails: mergedEmails, schedule: mergedSchedule };
   }
 
   async function init() {
@@ -390,16 +269,9 @@
     if (gistId && ghToken) {
       await syncFromServer(true);
     }
-
-    // 다른 업무를 보다가 달력 창을 다시 클릭하면 자동으로 최신 데이터 동기화
-    window.addEventListener('focus', () => {
-      if (gistId && ghToken && !isSaving) {
-        syncFromServer(true);
-      }
-    });
   }
 
-  function showToast(msg, ms = 2000) {
+  function showToast(msg, ms = 3500) {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.style.display = 'block';
@@ -417,8 +289,7 @@
     dbData.members.slice().sort().forEach(name => {
       const opt = document.createElement('option');
       opt.value = name;
-      const hasMail = dbData.emails[name] ? ' 🔔' : '';
-      opt.textContent = name + hasMail;
+      opt.textContent = name + (dbData.emails[name] ? ' 🔔' : '');
       if (name === currentUser) opt.selected = true;
       sel.appendChild(opt);
     });
@@ -450,66 +321,48 @@
   }
 
   async function setMyEmailPrompt() {
-    if (!currentUser) {
-      alert('먼저 왼쪽에서 [👤 내 이름]을 선택해 주세요!');
-      return;
-    }
+    if (!currentUser) return alert('먼저 왼쪽에서 [👤 내 이름]을 선택해 주세요!');
     await editMemberEmail(currentUser);
   }
 
   async function editMemberEmail(memberName) {
     const prevMail = dbData.emails[memberName] || '';
-    const input = prompt(
-      `[${memberName}] 님의 아침 9시 당일 안내 메일을 받을 이메일 주소를 입력하세요.\n(등록 해제하려면 빈칸으로 두고 확인)`,
-      prevMail
-    );
+    const input = prompt(`[${memberName}] 님의 알림 수신 이메일 주소를 입력하세요.\n(해제하려면 빈칸 입력)`, prevMail);
     if (input === null) return;
     const cleanMail = input.trim();
     if (cleanMail) {
       dbData.emails[memberName] = cleanMail;
       recentEmailChanges[memberName] = { email: cleanMail, ts: Date.now() };
-      showToast(`${memberName} 님의 알림 메일이 등록되었습니다!`);
     } else {
       delete dbData.emails[memberName];
       recentEmailChanges[memberName] = { email: null, ts: Date.now() };
-      showToast(`${memberName} 님의 알림 메일이 해제되었습니다.`);
     }
     renderUserSelect();
-    if (document.getElementById('memberModal').classList.contains('active')) {
-      renderMemberModalList();
-    }
+    if (document.getElementById('memberModal').classList.contains('active')) renderMemberModalList();
     queueSaveToServer();
   }
 
   async function addNewMember() {
-    const name = prompt('등록할 동아리원 이름(또는 닉네임)을 입력하세요:');
+    const name = prompt('등록할 동아리원 이름을 입력하세요:');
     if (!name || !name.trim()) return;
-
     const clean = name.trim();
-    if (!dbData.members.includes(clean)) {
-      dbData.members.push(clean);
-    }
+    if (!dbData.members.includes(clean)) dbData.members.push(clean);
     recentMemberChanges[clean] = { action: 'add', ts: Date.now() };
     currentUser = clean;
     localStorage.setItem('bg_user', clean);
 
-    const mail = prompt(`[${clean}] 님, 아침 9시 모임 안내 메일을 받으실 이메일 주소를 입력하세요 (건너뛰려면 취소):`);
+    const mail = prompt(`[${clean}] 님, 아침 9시 안내 메일을 받으실 이메일 주소를 입력하세요 (건너뛰려면 취소):`);
     if (mail && mail.trim()) {
-      const cleanMail = mail.trim();
-      dbData.emails[clean] = cleanMail;
-      recentEmailChanges[clean] = { email: cleanMail, ts: Date.now() };
+      dbData.emails[clean] = mail.trim();
+      recentEmailChanges[clean] = { email: mail.trim(), ts: Date.now() };
     }
-
     renderUserSelect();
     renderCalendar();
     queueSaveToServer();
   }
 
   async function openMemberModal() {
-    // 명단 관리창을 열 때 서버 최신 이메일/명단 상태를 먼저 한번 동기화
-    if (gistId && ghToken && !isSaving) {
-      await syncFromServer(true);
-    }
+    if (gistId && ghToken && !isSaving) await syncFromServer(true);
     renderMemberModalList();
     document.getElementById('memberModal').classList.add('active');
   }
@@ -522,57 +375,22 @@
     const box = document.getElementById('memberListBox');
     const sorted = dbData.members.slice().sort();
     document.getElementById('memberCountLabel').textContent = sorted.length;
-
-    if (sorted.length === 0) {
-      box.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:24px 0;font-size:0.88rem;">등록된 동아리원이 없습니다.</div>';
-      return;
-    }
-
     box.innerHTML = '';
     sorted.forEach(name => {
       const row = document.createElement('div');
       row.className = 'member-item';
-
-      const info = document.createElement('div');
-      info.className = 'member-info';
-
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'member-item-name';
-      nameSpan.textContent = name + (name === currentUser ? ' (나)' : '');
-
-      const emailSpan = document.createElement('span');
-      emailSpan.className = 'member-item-email';
       const mailAddr = dbData.emails[name];
-      emailSpan.textContent = mailAddr ? `🔔 ${mailAddr}` : '🔕 이메일 미등록';
-      if (mailAddr) emailSpan.style.color = '#15803d';
-
-      info.appendChild(nameSpan);
-      info.appendChild(emailSpan);
-
-      const actions = document.createElement('div');
-      actions.className = 'member-item-actions';
-
-      const mailBtn = document.createElement('button');
-      mailBtn.className = 'btn btn-sm';
-      mailBtn.textContent = '📧 메일 설정';
-      mailBtn.onclick = () => editMemberEmail(name);
-
-      const editBtn = document.createElement('button');
-      editBtn.className = 'btn btn-sm';
-      editBtn.textContent = '✏️ 이름 수정';
-      editBtn.onclick = () => renameMember(name);
-
-      const delBtn = document.createElement('button');
-      delBtn.className = 'btn btn-danger btn-sm';
-      delBtn.textContent = '🗑️ 삭제';
-      delBtn.onclick = () => deleteMember(name);
-
-      actions.appendChild(mailBtn);
-      actions.appendChild(editBtn);
-      actions.appendChild(delBtn);
-
-      row.appendChild(info);
-      row.appendChild(actions);
+      row.innerHTML = `
+        <div class="member-info">
+          <span class="member-item-name">${name}${name === currentUser ? ' (나)' : ''}</span>
+          <span class="member-item-email" style="${mailAddr ? 'color:#15803d' : ''}">${mailAddr ? '🔔 ' + mailAddr : '🔕 이메일 미등록'}</span>
+        </div>
+        <div class="member-item-actions">
+          <button class="btn btn-sm" onclick="editMemberEmail('${name}')">📧 메일 설정</button>
+          <button class="btn btn-sm" onclick="renameMember('${name}')">✏️ 이름 수정</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteMember('${name}')">🗑️ 삭제</button>
+        </div>
+      `;
       box.appendChild(row);
     });
   }
@@ -581,32 +399,24 @@
     const input = document.getElementById('bulkMemberInput');
     const raw = input.value.trim();
     if (!raw) return;
-
     const names = raw.split(/[,，\n\t]+/).map(s => s.trim()).filter(Boolean);
-    let addedCount = 0;
     const now = Date.now();
     names.forEach(n => {
-      if (!dbData.members.includes(n)) {
-        dbData.members.push(n);
-        addedCount++;
-      }
+      if (!dbData.members.includes(n)) dbData.members.push(n);
       recentMemberChanges[n] = { action: 'add', ts: now };
     });
-
     input.value = '';
     renderMemberModalList();
     renderUserSelect();
     renderCalendar();
     queueSaveToServer();
-    showToast(`${addedCount}명 추가 완료!`);
   }
 
   function renameMember(oldName) {
-    const newName = prompt(`[${oldName}] 님의 새로운 이름을 입력하세요:`, oldName);
+    const newName = prompt(`[${oldName}] 님의 새 이름을 입력하세요:`, oldName);
     if (!newName || !newName.trim() || newName.trim() === oldName) return;
     const cleanNew = newName.trim();
     const now = Date.now();
-
     const idx = dbData.members.indexOf(oldName);
     if (idx !== -1) {
       if (dbData.members.includes(cleanNew)) dbData.members.splice(idx, 1);
@@ -614,34 +424,16 @@
     }
     recentMemberChanges[oldName] = { action: 'del', ts: now };
     recentMemberChanges[cleanNew] = { action: 'add', ts: now };
-
     if (dbData.emails[oldName]) {
       dbData.emails[cleanNew] = dbData.emails[oldName];
       recentEmailChanges[cleanNew] = { email: dbData.emails[oldName], ts: now };
       delete dbData.emails[oldName];
       recentEmailChanges[oldName] = { email: null, ts: now };
     }
-
-    Object.keys(dbData.schedule).forEach(dateKey => {
-      ['lunch', 'dinner'].forEach(slot => {
-        const arr = dbData.schedule[dateKey][slot];
-        if (Array.isArray(arr)) {
-          const sIdx = arr.indexOf(oldName);
-          if (sIdx !== -1) {
-            if (arr.includes(cleanNew)) arr.splice(sIdx, 1);
-            else arr[sIdx] = cleanNew;
-            recentScheduleChanges[`${dateKey}|${slot}|${oldName}`] = { joined: false, ts: now };
-            recentScheduleChanges[`${dateKey}|${slot}|${cleanNew}`] = { joined: true, ts: now };
-          }
-        }
-      });
-    });
-
     if (currentUser === oldName) {
       currentUser = cleanNew;
       localStorage.setItem('bg_user', cleanNew);
     }
-
     renderMemberModalList();
     renderUserSelect();
     renderCalendar();
@@ -651,27 +443,14 @@
   function deleteMember(targetName) {
     if (!confirm(`[${targetName}] 님을 삭제하시겠습니까?`)) return;
     const now = Date.now();
-
     dbData.members = dbData.members.filter(n => n !== targetName);
     recentMemberChanges[targetName] = { action: 'del', ts: now };
-
     delete dbData.emails[targetName];
     recentEmailChanges[targetName] = { email: null, ts: now };
-
-    Object.keys(dbData.schedule).forEach(dateKey => {
-      ['lunch', 'dinner'].forEach(slot => {
-        if (Array.isArray(dbData.schedule[dateKey][slot]) && dbData.schedule[dateKey][slot].includes(targetName)) {
-          dbData.schedule[dateKey][slot] = dbData.schedule[dateKey][slot].filter(n => n !== targetName);
-          recentScheduleChanges[`${dateKey}|${slot}|${targetName}`] = { joined: false, ts: now };
-        }
-      });
-    });
-
     if (currentUser === targetName) {
       currentUser = '';
       localStorage.removeItem('bg_user');
     }
-
     renderMemberModalList();
     renderUserSelect();
     renderCalendar();
@@ -748,30 +527,20 @@
 
       const cell = document.createElement('div');
       cell.className = 'day-cell' + (dateKey === todayStr ? ' today' : '');
-
       const colorStyle = dow === 0 ? 'color:#dc2626;' : (dow === 6 ? 'color:#2563eb;' : '');
-      cell.innerHTML = `
-        <div class="date-num" style="${colorStyle}">
-          <span>${d}일 (${dayNames[dow]})</span>
-          ${dateKey === todayStr ? '<span class="today-tag">오늘</span>' : ''}
-        </div>
-      `;
-
+      cell.innerHTML = `<div class="date-num" style="${colorStyle}"><span>${d}일 (${dayNames[dow]})</span>${dateKey === todayStr ? '<span class="today-tag">오늘</span>' : ''}</div>`;
       cell.appendChild(createSlotEl(dateKey, 'lunch', '☀️ 점심', lunchList));
       cell.appendChild(createSlotEl(dateKey, 'dinner', '🌙 저녁', dinnerList));
       grid.appendChild(cell);
     }
 
     document.getElementById('statConfirmed').textContent = `이번 달 4인 성사: ${confirmedTotal}타임`;
-    document.getElementById('statMyCount').textContent = currentUser
-      ? `나의 참석(${currentUser}): ${myTotal}타임`
-      : '상단에서 내 이름을 선택하세요';
+    document.getElementById('statMyCount').textContent = currentUser ? `나의 참석(${currentUser}): ${myTotal}타임` : '상단에서 내 이름을 선택하세요';
   }
 
   function createSlotEl(dateKey, type, label, list) {
     const isConfirmed = list.length >= GOAL_COUNT;
     const isMyJoined = currentUser && list.includes(currentUser);
-
     const slot = document.createElement('div');
     slot.className = 'slot' + (isConfirmed ? ' confirmed' : '') + (isMyJoined ? ' my-joined' : '');
     slot.onclick = () => toggleAttendance(dateKey, type);
@@ -796,128 +565,119 @@
 
   function toggleAttendance(dateKey, type) {
     if (!currentUser) {
-      alert('먼저 화면 상단에서 [👤 내 이름]을 선택하거나 등록해 주세요!');
-      document.getElementById('userSelect').focus();
+      alert('먼저 화면 상단에서 [👤 내 이름]을 선택해 주세요!');
       return;
     }
-
-    if (!dbData.schedule[dateKey]) {
-      dbData.schedule[dateKey] = { lunch: [], dinner: [] };
-    }
-    if (!Array.isArray(dbData.schedule[dateKey][type])) {
-      dbData.schedule[dateKey][type] = [];
-    }
+    if (!dbData.schedule[dateKey]) dbData.schedule[dateKey] = { lunch: [], dinner: [] };
+    if (!Array.isArray(dbData.schedule[dateKey][type])) dbData.schedule[dateKey][type] = [];
 
     const arr = dbData.schedule[dateKey][type];
     const idx = arr.indexOf(currentUser);
     let isJoined = false;
+    if (idx === -1) { arr.push(currentUser); isJoined = true; }
+    else { arr.splice(idx, 1); isJoined = false; }
 
-    if (idx === -1) {
-      arr.push(currentUser);
-      isJoined = true;
-    } else {
-      arr.splice(idx, 1);
-      isJoined = false;
-    }
-
-    recentScheduleChanges[`${dateKey}|${type}|${currentUser}`] = {
-      joined: isJoined,
-      ts: Date.now()
-    };
-
+    recentScheduleChanges[`${dateKey}|${type}|${currentUser}`] = { joined: isJoined, ts: Date.now() };
     renderCalendar();
     queueSaveToServer();
   }
 
   function queueSaveToServer() {
     localStorage.setItem('bg_demo_data', JSON.stringify(dbData));
-    if (!gistId || !ghToken) return;
-
-    showToast('변경사항 저장 대기 중...');
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-      processSaveQueue();
-    }, 300);
-  }
-
-  // [핵심 개선] 저장하기 직전에 서버 최신본을 먼저 불러와 내 변경분만 안전하게 병합(Merge) 후 저장
-  async function processSaveQueue() {
-    if (isSaving) {
-      saveQueued = true;
+    if (!gistId || !ghToken) {
+      showToast('⚠️ [⚙️ 연동 및 설정]에서 토큰과 Gist ID를 먼저 등록해 주세요!', 4000);
       return;
     }
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { processSaveQueue(); }, 250);
+  }
+
+  async function sendGistUpdate(payloadStr) {
+    const headers = {
+      'Authorization': `token ${ghToken}`,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    };
+    // 1차: 표준 PATCH 시도
+    let res = await fetch(`https://api.github.com/gists/${gistId}`, {
+      method: 'PATCH',
+      headers,
+      body: payloadStr
+    });
+    // 만약 사내 방화벽 등이 PATCH를 막거나 실패하면 POST로 2차 시도
+    if (!res.ok && res.status !== 401 && res.status !== 404) {
+      res = await fetch(`https://api.github.com/gists/${gistId}`, {
+        method: 'POST',
+        headers,
+        body: payloadStr
+      });
+    }
+    return res;
+  }
+
+  async function processSaveQueue() {
+    if (isSaving) { saveQueued = true; return; }
     isSaving = true;
-    showToast('실시간 병합 및 저장 중...');
+    showToast('실시간 저장 중...');
 
     try {
-      // 1단계: 서버의 현재 최신 데이터 가져오기
-      const getRes = await fetch(`https://api.github.com/gists/${gistId}?t=${Date.now()}`, {
-        headers: { 'Authorization': `Bearer ${ghToken}` },
-        cache: 'no-store'
-      });
-
-      if (getRes.ok) {
-        const gistData = await getRes.json();
-        if (gistData.files && gistData.files['boardgame_calendar.json']) {
-          const serverDb = JSON.parse(gistData.files['boardgame_calendar.json'].content);
-          dbData = mergeWithServerDb(serverDb);
-        }
-      }
-
-      // 2단계: 병합된 최신 데이터를 서버에 저장
-      const patchRes = await fetch(`https://api.github.com/gists/${gistId}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${ghToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          files: {
-            'boardgame_calendar.json': {
-              content: JSON.stringify(dbData, null, 2)
-            }
+      // 서버 최신본 조회 시도 (실패해도 저장은 계속 진행)
+      try {
+        const getRes = await fetch(`https://api.github.com/gists/${gistId}`, {
+          headers: { 'Authorization': `token ${ghToken}` },
+          cache: 'no-store'
+        });
+        if (getRes.ok) {
+          const gistData = await getRes.json();
+          if (gistData.files && gistData.files['boardgame_calendar.json']) {
+            const serverDb = JSON.parse(gistData.files['boardgame_calendar.json'].content);
+            dbData = mergeWithServerDb(serverDb);
           }
-        })
+        }
+      } catch (ignore) {}
+
+      const payload = JSON.stringify({
+        files: { 'boardgame_calendar.json': { content: JSON.stringify(dbData, null, 2) } }
       });
 
-      if (!patchRes.ok) throw new Error('저장 실패');
+      const patchRes = await sendGistUpdate(payload);
+
+      if (!patchRes.ok) {
+        let reason = `HTTP ${patchRes.status}`;
+        if (patchRes.status === 401) reason = '401 오류: GitHub 토큰이 만료되었거나 잘못되었습니다.';
+        else if (patchRes.status === 404) reason = '404 오류: 토큰에 [gist] 권한 체크가 빠졌거나 Gist ID가 틀렸습니다.';
+        else if (patchRes.status === 403) reason = '403 오류: 권한 거부 또는 호출 한도 초과입니다.';
+        throw new Error(reason);
+      }
 
       localStorage.setItem('bg_demo_data', JSON.stringify(dbData));
       renderUserSelect();
       renderCalendar();
-      if (document.getElementById('memberModal').classList.contains('active')) {
-        renderMemberModalList();
-      }
-      showToast('저장 완료!');
+      if (document.getElementById('memberModal').classList.contains('active')) renderMemberModalList();
+      showToast('✅ 서버 저장 완료!', 2000);
     } catch (e) {
       console.error(e);
-      showToast('⚠️ 저장 중 오류 발생');
+      showToast(`❌ 저장 실패 (${e.message})`, 6000);
     } finally {
       isSaving = false;
-      if (saveQueued) {
-        saveQueued = false;
-        processSaveQueue();
-      }
+      if (saveQueued) { saveQueued = false; processSaveQueue(); }
     }
   }
 
   async function syncFromServer(silent = false, clearProtection = false) {
-    if (!gistId || !ghToken) return;
-    if (isSaving) return;
-
+    if (!gistId || !ghToken || isSaving) return;
     if (clearProtection) {
       Object.keys(recentScheduleChanges).forEach(k => delete recentScheduleChanges[k]);
       Object.keys(recentEmailChanges).forEach(k => delete recentEmailChanges[k]);
       Object.keys(recentMemberChanges).forEach(k => delete recentMemberChanges[k]);
     }
-
     if (!silent) showToast('실시간 일정 불러오는 중...');
     try {
-      const res = await fetch(`https://api.github.com/gists/${gistId}?t=${Date.now()}`, {
-        headers: { 'Authorization': `Bearer ${ghToken}` },
+      const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+        headers: { 'Authorization': `token ${ghToken}` },
         cache: 'no-store'
       });
-      if (!res.ok) throw new Error('불러오기 실패');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.files && data.files['boardgame_calendar.json']) {
         const serverDb = JSON.parse(data.files['boardgame_calendar.json'].content);
@@ -925,20 +685,18 @@
         localStorage.setItem('bg_demo_data', JSON.stringify(dbData));
         renderUserSelect();
         renderCalendar();
-        if (document.getElementById('memberModal').classList.contains('active')) {
-          renderMemberModalList();
-        }
-        if (!silent) showToast('최신 일정 반영 완료!');
+        if (document.getElementById('memberModal').classList.contains('active')) renderMemberModalList();
+        if (!silent) showToast('최신 일정 반영 완료!', 2000);
       }
     } catch (e) {
-      console.error(e);
-      if (!silent) showToast('서버 연동 오류');
+      if (!silent) showToast(`❌ 불러오기 실패 (${e.message})`, 4000);
     }
   }
 
   function openSetupModal() {
     document.getElementById('tokenInput').value = ghToken;
     document.getElementById('gistInput').value = gistId;
+    document.getElementById('diagBox').style.display = 'none';
     if (gistId && ghToken) showShareLink();
     document.getElementById('setupModal').classList.add('active');
   }
@@ -948,47 +706,79 @@
   }
 
   async function createNewGistDB() {
-    const token = document.getElementById('tokenInput').value.trim();
+    const token = cleanStr(document.getElementById('tokenInput').value);
     if (!token) return alert('GitHub Token을 입력해 주세요.');
     showToast('동아리 전용 DB 생성 중...');
     try {
       const res = await fetch('https://api.github.com/gists', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           description: 'Boardgame Club Calendar DB',
           public: false,
-          files: {
-            'boardgame_calendar.json': {
-              content: JSON.stringify(dbData, null, 2)
-            }
-          }
+          files: { 'boardgame_calendar.json': { content: JSON.stringify(dbData, null, 2) } }
         })
       });
-      if (!res.ok) throw new Error('토큰 오류');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       ghToken = token;
-      gistId = data.id;
+      gistId = cleanStr(data.id);
       localStorage.setItem('bg_gh_token', ghToken);
       localStorage.setItem('bg_gist_id', gistId);
       document.getElementById('gistInput').value = gistId;
       showShareLink();
-      showToast('동아리 DB 생성 완료!');
+      showToast('✅ 새 동아리 DB 생성 완료!');
     } catch (e) {
-      alert('생성 실패: 토큰 권한을 확인해주세요.');
+      alert(`생성 실패 (${e.message}): 토큰에 gist 권한이 체크되어 있는지 확인해주세요.`);
     }
   }
 
-  function saveManualConfig() {
-    ghToken = document.getElementById('tokenInput').value.trim();
-    gistId = document.getElementById('gistInput').value.trim();
+  async function saveManualConfig() {
+    ghToken = cleanStr(document.getElementById('tokenInput').value);
+    gistId = cleanStr(document.getElementById('gistInput').value);
     localStorage.setItem('bg_gh_token', ghToken);
     localStorage.setItem('bg_gist_id', gistId);
-    showShareLink();
-    syncFromServer(false, true);
+
+    const diag = document.getElementById('diagBox');
+    diag.style.display = 'block';
+    diag.style.background = '#f1f5f9';
+    diag.style.color = '#334155';
+    diag.innerHTML = '⏳ GitHub 서버와 읽기/쓰기 권한을 테스트하는 중입니다...';
+
+    try {
+      // 쓰기 권한까지 실제로 테스트하기 위해 현재 데이터를 그대로 업데이트 요청
+      const getRes = await fetch(`https://api.github.com/gists/${gistId}`, {
+        headers: { 'Authorization': `token ${ghToken}` },
+        cache: 'no-store'
+      });
+      if (!getRes.ok) throw new Error(`불러오기 실패 (HTTP ${getRes.status})`);
+      const gistData = await getRes.json();
+      if (gistData.files && gistData.files['boardgame_calendar.json']) {
+        const serverDb = JSON.parse(gistData.files['boardgame_calendar.json'].content);
+        dbData = mergeWithServerDb(serverDb);
+      }
+
+      const payload = JSON.stringify({
+        files: { 'boardgame_calendar.json': { content: JSON.stringify(dbData, null, 2) } }
+      });
+      const writeRes = await sendGistUpdate(payload);
+      if (!writeRes.ok) {
+        if (writeRes.status === 401) throw new Error('401 오류: 토큰 값이 틀렸거나 만료되었습니다.');
+        if (writeRes.status === 404) throw new Error('404 오류: 토큰 발급 시 [gist] 체크박스를 빠뜨렸거나, 본인 계정의 Gist가 아닙니다.');
+        throw new Error(`쓰기 실패 (HTTP ${writeRes.status})`);
+      }
+
+      diag.style.background = '#dcfce7';
+      diag.style.color = '#15803d';
+      diag.innerHTML = '✅ <b>정상 연결 완료!</b> 읽기와 저장(쓰기)이 모두 완벽하게 작동합니다.';
+      showShareLink();
+      renderUserSelect();
+      renderCalendar();
+    } catch (e) {
+      diag.style.background = '#fee2e2';
+      diag.style.color = '#b91c1c';
+      diag.innerHTML = `❌ <b>연결/저장 실패:</b> ${e.message}`;
+    }
   }
 
   function showShareLink() {
