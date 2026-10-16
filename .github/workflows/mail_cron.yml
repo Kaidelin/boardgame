@@ -2,7 +2,7 @@ name: Send Daily Boardgame Reminder
 
 on:
   schedule:
-    - cron: '0 0 * * *' # UTC 00:00 = 한국 시간(KST) 매일 아침 09:00
+    - cron: '5 0 * * *' # UTC 00:05 = 한국 시간(KST) 매일 아침 09:05
   workflow_dispatch:   # 수동 실행 버튼 활성화
 
 jobs:
@@ -19,6 +19,7 @@ jobs:
 
       - name: Run script
         env:
+          TZ : 'Asia/Seoul'
           GIST_ID: ${{ secrets.GIST_ID }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
