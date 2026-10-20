@@ -2,11 +2,10 @@ name: Send Daily Boardgame Reminder
 
 on:
   schedule:
-    # 1차 실행: 한국 시간(KST) 매일 오전 08시 47분 (UTC 23시 47분)
     - cron: '47 23 * * *'
-    # 2차 예비 실행: 한국 시간(KST) 매일 오전 09시 07분 (UTC 00시 07분)
-    - cron: '7 0 * * *'
-  workflow_dispatch: # 수동 실행 버튼 활성화
+    - cron: '3 0 * * *'
+    - cron: '17 0 * * *'
+  workflow_dispatch:
 
 jobs:
   send-mail:
