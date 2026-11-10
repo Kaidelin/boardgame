@@ -2,9 +2,9 @@ name: Send Daily Boardgame Reminder
 
 on:
   schedule:
-    - cron: '30 21 * * *'
-    - cron: '45 21 * * *'
-    - cron: '00 22 * * *'
+    - cron: '27 19 * * *'
+    - cron: '43 19 * * *'
+    - cron: '57 19 * * *'
   workflow_dispatch:
 
 jobs:
